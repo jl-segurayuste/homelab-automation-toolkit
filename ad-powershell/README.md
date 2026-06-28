@@ -33,6 +33,43 @@ New-ADUserWithPosix -UserName "jdoe" -UID 75434 -GID 10625 `
   -OrganizationalUnit "OU=usuarios,DC=example,DC=lan" -Password $pwd
 ```
 
+## Módulos de Ansible
+
+Las mismas operaciones están disponibles como **módulos de Ansible para Windows**
+(PowerShell nativo con `Ansible.Basic`) en [`library/`](library/), para orquestar AD
+desde playbooks contra hosts Windows (WinRM/SSH) con soporte de `--check`:
+
+| Módulo | Función |
+|--------|---------|
+| `win_ad_user` | Alta/baja/actualización de usuario con atributos POSIX; `update_mode` safe/force; membresía de grupos; contraseña dada o generada |
+| `win_ad_group` | Alta/baja de grupo con `gidNumber`; no sobrescribe un GID existente distinto |
+| `win_ad_group_member` | Añade (`present`) o retira (`absent`) un usuario de varios grupos (offboarding) |
+| `win_ad_random_password` | Genera contraseña conforme a la política (no realiza cambios; usa `no_log`) |
+| `win_ad_next_username` | Calcula el siguiente `SamAccountName` libre (solo lectura) |
+
+Ejemplo de playbook en [`examples/alta_usuario.yml`](examples/alta_usuario.yml). Documentación
+por módulo con `ansible-doc -M library win_ad_user`.
+
+```yaml
+- hosts: domain_controllers
+  tasks:
+    - name: Alta de usuario funcional con POSIX
+      win_ad_user:
+        name: jdoe
+        uid_number: 75434
+        gid_number: 10625
+        unix_home_directory: /home/jdoe
+        login_shell: /bin/bash
+        gecos: Usuario de ejemplo
+        organizational_unit: "OU=usuarios,DC=example,DC=lan"
+        generate_password: true
+        groups: [appgroup]
+      no_log: true
+```
+
+Las funciones PowerShell originales (dot-sourcing) se conservan como alternativa para uso
+interactivo; los módulos son la forma idiomática para Ansible.
+
 ## Notas de seguridad
 
 - No incrustes contraseñas: genera con `Generate-RandomPassword` o pásalas como `SecureString`.

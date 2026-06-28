@@ -1,0 +1,44 @@
+---
+# Ejemplo: alta completa de un usuario funcional en Active Directory con POSIX.
+# Ejecutar contra un host Windows con el modulo ActiveDirectory (RSAT).
+# Los modulos estan en ../library (configura library en ansible.cfg o usa -M).
+#
+#   ansible-playbook -i inventory.ini alta_usuario.yml
+#
+# Variables sensibles (OU, dominio) parametrizadas; nada de datos reales aqui.
+- name: Alta de usuario en Active Directory
+  hosts: domain_controllers
+  gather_facts: false
+  vars:
+    usuario: jdoe
+    ou_usuarios: "OU=usuarios,DC=example,DC=lan"
+    grupo_funcional: appgroup
+    gid: 10625
+    uid: 75434
+  tasks:
+    - name: Calcular SamAccountName libre si el base ya existe
+      win_ad_next_username:
+        username: "{{ usuario }}"
+      register: nombre
+      failed_when: false
+
+    - name: Asegurar el grupo funcional con su GID
+      win_ad_group:
+        name: "{{ grupo_funcional }}"
+        gid_number: "{{ gid }}"
+        organizational_unit: "OU=grupos,DC=example,DC=lan"
+        description: Grupo funcional de ejemplo
+
+    - name: Crear el usuario con atributos POSIX y contrasena generada
+      win_ad_user:
+        name: "{{ usuario }}"
+        uid_number: "{{ uid }}"
+        gid_number: "{{ gid }}"
+        unix_home_directory: "/home/{{ usuario }}"
+        login_shell: /bin/bash
+        gecos: Usuario de ejemplo
+        organizational_unit: "{{ ou_usuarios }}"
+        generate_password: true
+        groups:
+          - "{{ grupo_funcional }}"
+      no_log: true
