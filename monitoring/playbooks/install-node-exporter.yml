@@ -1,0 +1,70 @@
+---
+# Instala Prometheus node_exporter como servicio systemd endurecido.
+# Por seguridad escucha SOLO en localhost (expon via reverse proxy con auth/TLS
+# o scrapea por red privada/VPN). Crea un usuario de sistema sin shell.
+#   ansible-playbook -i inventory.ini install-node-exporter.yml
+- name: Instalar node_exporter (seguro)
+  hosts: monitored
+  become: true
+  vars:
+    node_exporter_version: "1.8.2"
+    node_exporter_listen: "127.0.0.1:9100"
+    node_exporter_arch: "linux-amd64"
+  tasks:
+    - name: Usuario de sistema sin login
+      ansible.builtin.user:
+        name: node_exporter
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Descargar y extraer node_exporter
+      ansible.builtin.unarchive:
+        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.{{ node_exporter_arch }}.tar.gz"
+        dest: /tmp
+        remote_src: true
+
+    - name: Instalar binario
+      ansible.builtin.copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.{{ node_exporter_arch }}/node_exporter"
+        dest: /usr/local/bin/node_exporter
+        mode: "0755"
+        remote_src: true
+
+    - name: Unidad systemd endurecida
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/node_exporter.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Prometheus Node Exporter
+          After=network.target
+
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          ExecStart=/usr/local/bin/node_exporter --web.listen-address={{ node_exporter_listen }}
+          NoNewPrivileges=true
+          ProtectSystem=strict
+          ProtectHome=true
+          PrivateTmp=true
+          ProtectKernelTunables=true
+          ProtectControlGroups=true
+          RestrictAddressFamilies=AF_INET AF_INET6
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Recargar systemd
+
+    - name: Habilitar y arrancar node_exporter
+      ansible.builtin.systemd:
+        name: node_exporter
+        state: started
+        enabled: true
+        daemon_reload: true
+
+  handlers:
+    - name: Recargar systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
