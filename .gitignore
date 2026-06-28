@@ -31,6 +31,7 @@ inventory/staging
 # === Internos (NO publicar) ===
 scripts/security/blacklist.local.txt
 RETOMAR.md
+web-form/config.php
 
 # === Ruido ===
 __pycache__/
