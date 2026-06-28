@@ -13,6 +13,9 @@ reutilizables y sin datos sensibles.
 | Sección | Descripción |
 |---------|-------------|
 | `openvpn/` | Herramientas de gestión de OpenVPN: instalación, diagnóstico, backup, monitorización, rotación de IP pública, checklist de seguridad |
+| `wireguard/` | VPN moderna con WireGuard: instalación segura del servidor y alta de peers (claves generadas en el host, PSK por peer) |
+| `backups/` | Copias de seguridad cifradas y verificadas con restic o BorgBackup (retención, integridad) |
+| `monitoring/` | Monitorización y alertas: `node_exporter` endurecido (Ansible) y detección de fuerza bruta en logs de auth |
 | `ansible-starter/` | Plantilla genérica de proyecto Ansible (roles common/database/webserver, inventarios, playbooks) |
 | `hardening/` | Endurecimiento básico de servidores Linux (sysctl, UFW, fail2ban, rkhunter, SSH, unattended-upgrades) |
 | `maintenance/` | Mantenimiento de servidores: limpieza de containerd/K3s y dumps de bases de datos en Docker |
