@@ -8,6 +8,7 @@ de integridad. Pensados para `cron` o un `systemd.timer`.
 |--------|-------------|
 | `restic-backup.sh` | restic (soporta local, SFTP, S3, B2...) |
 | `borg-backup.sh` | BorgBackup (local o `ssh://`) |
+| `vaultwarden-backup.sh` | Backup **consistente** de Vaultwarden (para el contenedor para un checkpoint limpio del WAL de SQLite, tar del volumen y arranca; con retención) |
 
 ## Uso (restic)
 
@@ -25,6 +26,17 @@ sudo RESTIC_REPOSITORY=/mnt/backup/restic \
 echo 'una-passphrase-larga-y-aleatoria' > /root/.borg-pass && chmod 600 /root/.borg-pass
 sudo BORG_REPO=/mnt/backup/borg BORG_PASSPHRASE_FILE=/root/.borg-pass \
      BACKUP_PATHS="/etc /home" bash borg-backup.sh
+```
+
+## Uso (Vaultwarden)
+
+```bash
+# Ajusta el contenedor/volumen/destino por variables de entorno
+sudo VW_CONTAINER=vaultwarden \
+     VW_VOL_DATA=/var/lib/docker/volumes/vaultwarden-data/_data \
+     VW_DEST=/var/backups/vaultwarden VW_RETENTION=14 \
+     bash vaultwarden-backup.sh
+# Luego sincroniza VW_DEST a un destino remoto con restic/borg/rsync.
 ```
 
 ## Seguridad
