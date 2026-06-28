@@ -9,6 +9,7 @@ buenas prácticas desde el primer minuto.
 | `provision-samba-ad-dc.sh` | Provisiona un DC (Samba AD) con DNS interno; pide la contraseña de forma interactiva (no se incrusta) |
 | `harden-kerberos.sh` | Reescribe `/etc/krb5.conf` con solo AES (sin RC4/DES), `allow_weak_crypto=false` y tiempos de ticket acotados |
 | `kerberos-security-audit.sh` | Auditoría de solo lectura: cifrados débiles, política de contraseñas, cuentas de riesgo y grupos privilegiados |
+| `audit-keytabs-noaes.sh` | Recorre una flota de servidores por SSH y detecta keytabs con cifrado débil (no-AES: RC4/DES); genera CSV. Solo lectura |
 
 ## Uso
 
