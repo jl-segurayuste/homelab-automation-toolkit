@@ -32,6 +32,11 @@ Antes de publicar o en cualquier momento: `bash scripts/security/scan-repo.sh`.
 git config core.hooksPath .githooks
 ```
 
+## Contribuir
+
+¿Quieres aportar una automatización? Lee la [guía de contribución](CONTRIBUTING.md).
+Reglas clave: sin secretos, sin nombres propios y sin iconos en scripts.
+
 ## Licencia
 
 MIT — ver [LICENSE](LICENSE).
