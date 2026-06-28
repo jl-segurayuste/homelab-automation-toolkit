@@ -20,6 +20,7 @@ reutilizables y sin datos sensibles.
 | `ad-powershell/` | Administración segura de usuarios/grupos de Active Directory con atributos POSIX (PowerShell) |
 | `ansible-dc/` | Módulos Ansible propios (`samba_ad_user`/`samba_ad_group`) y roles para gestionar usuarios/grupos del DC |
 | `docker/` | Instalación, hardening y gestión de contenedores Docker con Ansible + auditoría de seguridad (CIS) |
+| `linux-audit/` | Auditoría de seguridad de hosts Linux (solo lectura, estilo CIS) y reglas base de `auditd` |
 | `web-form/` | Ejemplo didáctico de formulario web PHP con conexión a BD |
 
 ## Normas del repositorio (forzadas por hook pre-commit)

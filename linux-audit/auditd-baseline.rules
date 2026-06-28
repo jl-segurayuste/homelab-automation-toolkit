@@ -1,0 +1,44 @@
+# Reglas base de auditd para trazabilidad de seguridad (Linux).
+# Copia a /etc/audit/rules.d/99-baseline.rules y recarga: augenrules --load
+# Inspirado en recomendaciones CIS. Ajusta a tu carga (puede generar mucho log).
+
+# No permitir que se modifiquen estas reglas en caliente (al final: -e 2 bloquea)
+-D
+-b 8192
+-f 1
+
+# --- Identidad y autenticacion ---
+-w /etc/passwd -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+
+# --- Acceso SSH y PAM ---
+-w /etc/ssh/sshd_config -p wa -k sshd
+-w /etc/pam.d/ -p wa -k pam
+
+# --- Sucesos de login ---
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+-w /var/run/utmp -p wa -k session
+
+# --- Cambios de hora/fecha (manipulacion de evidencias) ---
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+
+# --- Modulos del kernel ---
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module,delete_module -k modules
+
+# --- Uso de privilegios / escaladas ---
+-a always,exit -F arch=b64 -C euid!=uid -F euid=0 -F auid>=1000 -F auid!=4294967295 -S execve -k privilege
+
+# --- Montajes ---
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+
+# Hacer la configuracion inmutable hasta el proximo reinicio
+-e 2
