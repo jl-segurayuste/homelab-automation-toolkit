@@ -31,6 +31,7 @@ reutilizables y sin datos sensibles.
 | `ansible-security/` | Baseline de seguridad declarativa con Ansible (sysctl, SSH, UFW, fail2ban, auditd, updates) + integración con AD (Kerberos + SSSD/realmd, sudo por grupos) |
 | `bash-toolkit/` | Librerías reutilizables para scripts Bash robustos: plantilla con logging/HTTP/validaciones/temporales y funciones de monitorización (Nagios/Icinga) |
 | `network-tools/` | Utilidades de diagnóstico de red: diagnóstico de IPs (ping/nmap/curl/traceroute/whois), comparación de escaneos y listas de exclusión |
+| `backups-local/` | Copias de seguridad locales por niveles (rsync/tar, snapshots LVM, imágenes de VMs) orquestadas por un script maestro con reporte e alertas |
 
 ## Normas del repositorio (forzadas por hook pre-commit)
 
