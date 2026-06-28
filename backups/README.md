@@ -9,6 +9,7 @@ de integridad. Pensados para `cron` o un `systemd.timer`.
 | `restic-backup.sh` | restic (soporta local, SFTP, S3, B2...) |
 | `borg-backup.sh` | BorgBackup (local o `ssh://`) |
 | `vaultwarden-backup.sh` | Backup **consistente** de Vaultwarden (para el contenedor para un checkpoint limpio del WAL de SQLite, tar del volumen y arranca; con retención) |
+| `keys-backup.sh` | Backup **cifrado** (GPG AES256) de claves sensibles (`~/.ssh/id_*` y `~/.gnupg`); manual, pide passphrase |
 
 ## Uso (restic)
 
