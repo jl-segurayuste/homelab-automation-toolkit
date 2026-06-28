@@ -6,6 +6,9 @@ Scripts de mantenimiento para servidores con contenedores/Kubernetes.
 |--------|----------|
 | `cleanup-containerd.sh` | Libera espacio en nodos K3s: poda imágenes/contenedores/cache de containerd (para K3s durante la limpieza) |
 | `db-dumps.sh` | Dumps lógicos de bases de datos PostgreSQL/MySQL que corren en Docker, con retención y notificación opcional |
+| `disk-cleanup.sh` | Libera espacio (journald, logs, APT, snap, kernels antiguos; `--docker` añade poda de Docker) |
+| `move-docker-to-home.sh` | Mueve el data-root de Docker (`/var/lib/docker`) a otra partición vía rsync + symlink |
+| `move-ollama-to-home.sh` | Mueve los modelos de Ollama a otra partición vía rsync + symlink |
 
 ## Uso
 
@@ -19,6 +22,10 @@ DEST_BASE=/ruta/backups NTFY_URL=https://ntfy.example.com/mis-backups bash db-du
 
 ## Avisos
 
+- `disk-cleanup.sh` borra logs/temporales/kernels antiguos; el flag `--docker` ejecuta
+  `docker system prune -a --volumes` (elimina datos de Docker no usados): revísalo antes.
+- `move-*-to-home.sh` paran el servicio, copian con rsync y dejan un symlink; conservan un
+  backup del original hasta que verifiques que funciona.
 - `cleanup-containerd.sh` **detiene K3s** temporalmente: úsalo en mantenimiento.
 - `db-dumps.sh` lee la contraseña de MySQL **dentro del contenedor**
   (`$MYSQL_ROOT_PASSWORD`); nunca la pongas en la línea de comandos.
