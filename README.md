@@ -48,6 +48,10 @@ Antes de publicar o en cualquier momento: `bash scripts/security/scan-repo.sh`.
 git config core.hooksPath .githooks
 ```
 
+## Documentación
+
+- [Buenas prácticas y errores comunes (Ansible y Bash)](docs/ansible-bash-buenas-practicas.md)
+
 ## Contribuir
 
 ¿Quieres aportar una automatización? Lee la [guía de contribución](CONTRIBUTING.md).
