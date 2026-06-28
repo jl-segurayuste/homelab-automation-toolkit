@@ -1,0 +1,30 @@
+---
+# Aplica una configuracion endurecida del daemon de Docker.
+# Mitiga: escalada por capacidades (no-new-privileges), trafico lateral entre
+# contenedores (icc=false), logs sin limite y reinicios que tumban contenedores.
+#   ansible-playbook -i inventory.ini harden-docker.yml
+- name: Hardening del daemon Docker
+  hosts: docker_hosts
+  become: true
+  vars:
+    docker_userns_remap: false   # poner true para aislar UID de contenedor del host
+  tasks:
+    - name: Desplegar /etc/docker/daemon.json endurecido
+      ansible.builtin.template:
+        src: ../templates/daemon.json.j2
+        dest: /etc/docker/daemon.json
+        mode: "0644"
+        backup: true
+      notify: Reiniciar Docker
+
+    - name: Permisos correctos del socket de Docker
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        mode: "0660"
+      ignore_errors: true
+
+  handlers:
+    - name: Reiniciar Docker
+      ansible.builtin.service:
+        name: docker
+        state: restarted

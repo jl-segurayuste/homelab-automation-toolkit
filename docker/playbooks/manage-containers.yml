@@ -1,0 +1,35 @@
+---
+# Despliega contenedores de forma declarativa y segura con community.docker.
+# Requiere: ansible-galaxy collection install community.docker
+#
+# Define 'containers' en tu inventario/group_vars. Ejemplo de defaults abajo.
+- name: Gestionar contenedores Docker
+  hosts: docker_hosts
+  become: true
+  vars:
+    containers:
+      - name: web
+        image: nginx:stable
+        published_ports: ["127.0.0.1:8080:80"]   # bind a localhost, no 0.0.0.0
+        env: {}
+        restart_policy: unless-stopped
+        # Opciones de seguridad recomendadas:
+        read_only: true
+        cap_drop: [ALL]
+        security_opts: ["no-new-privileges:true"]
+  tasks:
+    - name: Asegurar contenedores
+      community.docker.docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: started
+        pull: true
+        restart_policy: "{{ item.restart_policy | default('unless-stopped') }}"
+        published_ports: "{{ item.published_ports | default([]) }}"
+        env: "{{ item.env | default({}) }}"
+        read_only: "{{ item.read_only | default(true) }}"
+        cap_drop: "{{ item.cap_drop | default(['ALL']) }}"
+        security_opts: "{{ item.security_opts | default(['no-new-privileges:true']) }}"
+      loop: "{{ containers }}"
+      loop_control:
+        label: "{{ item.name }}"
