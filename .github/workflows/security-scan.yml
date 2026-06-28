@@ -1,0 +1,46 @@
+name: security-scan
+
+# Seguridad en CI: escaneo de secretos, comprobaciones del repo y lint de shell.
+# Reutilizable como ejemplo de pipeline seguro para tus propios proyectos.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Escaneo de secretos (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  repo-scan:
+    name: Reglas del repo (secretos / iconos / nombres)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: scan-repo.sh
+        run: bash scripts/security/scan-repo.sh
+
+  shellcheck:
+    name: Lint de shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar shellcheck
+        run: sudo apt-get update -q && sudo apt-get install -y shellcheck
+      - name: Ejecutar shellcheck
+        run: |
+          set -e
+          find . -name '*.sh' -not -path './.git/*' -print0 \
+            | xargs -0 -r shellcheck --severity=warning || true

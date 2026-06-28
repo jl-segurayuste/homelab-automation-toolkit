@@ -1,5 +1,7 @@
 # homelab-automation-toolkit
 
+![security-scan](https://github.com/jl-segurayuste/homelab-automation-toolkit/actions/workflows/security-scan.yml/badge.svg)
+
 Colección de scripts y plantillas de automatización para administración de sistemas,
 redes y homelab. Pensado como ayuda para la comunidad: utilidades genéricas,
 reutilizables y sin datos sensibles.
@@ -24,6 +26,7 @@ reutilizables y sin datos sensibles.
 | `ansible-dc/` | Módulos Ansible propios (`samba_ad_user`/`samba_ad_group`) y roles para gestionar usuarios/grupos del DC |
 | `docker/` | Instalación, hardening y gestión de contenedores Docker con Ansible + auditoría de seguridad (CIS) |
 | `linux-audit/` | Auditoría de seguridad de hosts Linux (solo lectura, estilo CIS) y reglas base de `auditd` |
+| `incident-response/` | Respuesta a incidentes (solo lectura): triaje de estado volátil y caza de mecanismos de persistencia |
 | `web-form/` | Ejemplo didáctico de formulario web PHP con conexión a BD |
 
 ## Normas del repositorio (forzadas por hook pre-commit)
