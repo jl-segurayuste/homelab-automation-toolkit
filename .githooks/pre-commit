@@ -42,7 +42,7 @@ for f in "${FILES[@]}"; do
     'xox[baprs]-[0-9A-Za-z-]{10,}' \
     '(password|passwd|pwd|secret|api[_-]?key|token)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}'
   do
-    MATCH=$(git show ":$f" 2>/dev/null | grep -nEi "$pat" | grep -vEi "$EXCLUDE" || true)
+    MATCH=$(git show ":$f" 2>/dev/null | grep -nEi -e "$pat" | grep -vEi -e "$EXCLUDE" || true)
     if [ -n "$MATCH" ]; then
       echo "[SECRETO] posible secreto en '$f' (patron: $pat)"
       echo "$MATCH" | sed 's/^/      /' | head -3
