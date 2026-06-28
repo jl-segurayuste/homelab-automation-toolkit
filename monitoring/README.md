@@ -6,6 +6,8 @@ Observabilidad y detección básica, con foco en seguridad.
 |---------|----------|
 | `playbooks/install-node-exporter.yml` | Instala Prometheus `node_exporter` como servicio systemd **endurecido**, escuchando solo en `127.0.0.1` |
 | `auth-monitor.sh` | Vigila el log de autenticación: fuerza bruta SSH por IP, usuarios inválidos y fallos de `sudo`; notifica por ntfy/webhook |
+| `health-alerts.sh` | Chequeo de salud (disco, RAM, servicios systemd y contenedores Docker configurables) con alerta por email |
+| `verify-ai-stack.sh` | Verificación de solo lectura de un stack de IA local (Ollama + Open WebUI): servicio, API, modelos, conectividad, firewall y recursos |
 
 ## Uso
 
