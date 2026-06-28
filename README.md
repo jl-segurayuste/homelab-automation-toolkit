@@ -10,12 +10,12 @@ reutilizables y sin datos sensibles.
 
 ## Contenido
 
-| Sección | Descripción | Estado |
-|---------|-------------|--------|
-| `openvpn/` | Herramientas de gestión de OpenVPN: instalación, diagnóstico, backup, monitorización, rotación de IP pública, checklist de seguridad | Pendiente de migrar |
-| `ansible-starter/` | Plantilla genérica de proyecto Ansible (roles common/database/webserver) | Pendiente de migrar |
-| `web-form/` | Ejemplo de formulario web PHP con conexión a BD (didáctico) | Pendiente de migrar |
-| `scripts/` | Utilidades varias de sysadmin | Pendiente de migrar |
+| Sección | Descripción |
+|---------|-------------|
+| `openvpn/` | Herramientas de gestión de OpenVPN: instalación, diagnóstico, backup, monitorización, rotación de IP pública, checklist de seguridad |
+| `ansible-starter/` | Plantilla genérica de proyecto Ansible (roles common/database/webserver, inventarios, playbooks) |
+| `hardening/` | Endurecimiento básico de servidores Linux (sysctl, UFW, fail2ban, rkhunter, SSH, unattended-upgrades) |
+| `web-form/` | Ejemplo didáctico de formulario web PHP con conexión a BD |
 
 ## Normas del repositorio (forzadas por hook pre-commit)
 
