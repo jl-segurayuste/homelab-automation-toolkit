@@ -1,0 +1,79 @@
+---
+# Tareas para servidor de base de datos / Database server tasks
+# Role: database
+
+- name: Instalar PostgreSQL / Install PostgreSQL
+  apt:
+    name:
+      - "postgresql-{{ db_version }}"
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+  when: db_type == "postgresql"
+
+- name: Asegurar que PostgreSQL está iniciado / Ensure PostgreSQL is started
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Permitir PostgreSQL en el firewall / Allow PostgreSQL in firewall
+  ufw:
+    rule: allow
+    port: "{{ db_port }}"
+    proto: tcp
+  when: allow_external_db_access | default(false)
+
+- name: Configurar PostgreSQL / Configure PostgreSQL
+  template:
+    src: postgresql.conf.j2
+    dest: "/etc/postgresql/{{ db_version }}/main/postgresql.conf"
+    owner: postgres
+    group: postgres
+    mode: '0644'
+  notify: restart postgresql
+
+- name: Configurar autenticación de PostgreSQL / Configure PostgreSQL authentication
+  template:
+    src: pg_hba.conf.j2
+    dest: "/etc/postgresql/{{ db_version }}/main/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0640'
+  notify: restart postgresql
+
+- name: Crear base de datos / Create database
+  become_user: postgres
+  postgresql_db:
+    name: "{{ db_name }}"
+    encoding: UTF-8
+    lc_collate: es_ES.UTF-8
+    lc_ctype: es_ES.UTF-8
+    template: template0
+
+- name: Crear usuario de base de datos / Create database user
+  become_user: postgres
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password | default(omit) }}"
+    db: "{{ db_name }}"
+    priv: ALL
+    role_attr_flags: CREATEDB,NOSUPERUSER
+
+- name: Configurar backup automático / Configure automatic backup
+  cron:
+    name: "PostgreSQL backup {{ db_name }}"
+    minute: "0"
+    hour: "2"
+    job: "pg_dump {{ db_name }} > /var/backups/database/{{ db_name }}_$(date +\\%Y\\%m\\%d).sql"
+    user: postgres
+  when: db_backup_enabled | bool
+
+- name: Crear directorio de backup / Create backup directory
+  file:
+    path: /var/backups/database
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+  when: db_backup_enabled | bool

@@ -1,0 +1,33 @@
+---
+# Playbook principal / Main playbook
+# ansible-starter
+#
+# Uso / Usage:
+# ansible-playbook -i inventory/production playbooks/site.yml
+
+- name: Configurar todos los servidores / Configure all servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Incluir configuración común / Include common configuration
+      import_role:
+        name: common
+
+- name: Configurar servidores web / Configure web servers
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Configurar servidor web / Configure web server
+      import_role:
+        name: webserver
+
+- name: Configurar servidores de base de datos / Configure database servers
+  hosts: databases
+  become: true
+
+  tasks:
+    - name: Configurar base de datos / Configure database
+      import_role:
+        name: database

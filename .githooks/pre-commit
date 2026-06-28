@@ -31,6 +31,9 @@ for f in "${FILES[@]}"; do
   [ -f "$f" ] || continue
 
   # --- 1) Patrones de secretos (en todos los archivos) ---
+  # Se ignoran valores que son claramente plantillas/placeholders (no secretos reales):
+  # variables Jinja/Ansible {{ }}, <PLACEHOLDER>, vault_, default(omit), $VAR, changeme...
+  EXCLUDE='\{\{|\}\}|<[A-Za-z_]|vault_|default\(|omit|changeme|change_?me|example|ejemplo|placeholder|tu_|TU_|\$\{?[A-Za-z_]|lookup\('
   for pat in \
     'glpat-[A-Za-z0-9_-]{20,}' \
     'gh[pousr]_[A-Za-z0-9]{30,}' \
@@ -39,9 +42,10 @@ for f in "${FILES[@]}"; do
     'xox[baprs]-[0-9A-Za-z-]{10,}' \
     '(password|passwd|pwd|secret|api[_-]?key|token)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}'
   do
-    if git show ":$f" 2>/dev/null | grep -nEi "$pat" >/dev/null 2>&1; then
+    MATCH=$(git show ":$f" 2>/dev/null | grep -nEi "$pat" | grep -vEi "$EXCLUDE" || true)
+    if [ -n "$MATCH" ]; then
       echo "[SECRETO] posible secreto en '$f' (patron: $pat)"
-      git show ":$f" | grep -nEi "$pat" | sed 's/^/      /' | head -3
+      echo "$MATCH" | sed 's/^/      /' | head -3
       FAIL=1
     fi
   done

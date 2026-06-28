@@ -1,0 +1,39 @@
+---
+# Variables globales para todos los hosts / Global variables for all hosts
+# ansible-starter
+
+# Usuario y permisos / User and permissions
+ansible_user: admin
+ansible_become: true
+ansible_become_method: sudo
+
+# Python interpreter
+ansible_python_interpreter: /usr/bin/python3
+
+# Timezone
+timezone: "Europe/Madrid"
+
+# Configuración de red / Network configuration
+dns_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+# Configuración de seguridad / Security configuration
+disable_root_login: true
+allow_password_authentication: false
+
+# Paquetes comunes / Common packages
+common_packages:
+  - vim
+  - git
+  - curl
+  - wget
+  - htop
+  - tree
+
+# Configuración de logs / Logging configuration
+log_retention_days: 30
+
+# Configuración de backup / Backup configuration
+backup_enabled: true
+backup_retention_days: 7

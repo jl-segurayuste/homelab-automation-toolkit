@@ -1,0 +1,5 @@
+---
+# Variables por defecto para el rol webserver / Default variables for webserver role
+
+# Por defecto, las variables vienen de group_vars/webservers.yml
+# By default, variables come from group_vars/webservers.yml

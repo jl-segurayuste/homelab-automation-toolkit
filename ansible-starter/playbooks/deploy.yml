@@ -1,0 +1,69 @@
+---
+# Playbook de despliegue / Deployment playbook
+# ansible-starter
+#
+# Uso / Usage:
+# ansible-playbook -i inventory/production playbooks/deploy.yml
+
+- name: Desplegar aplicación ansible-starter / Deploy ansible-starter application
+  hosts: webservers
+  become: true
+  serial: 1  # Desplegar en un servidor a la vez / Deploy one server at a time
+
+  vars:
+    app_version: "{{ lookup('env', 'APP_VERSION') | default('latest') }}"
+    app_repo: "https://github.com/tu-usuario/ansible-starter.git"
+    deploy_path: "/var/www/example"
+
+  pre_tasks:
+    - name: Verificar conectividad / Check connectivity
+      ping:
+
+    - name: Mostrar versión a desplegar / Show version to deploy
+      debug:
+        msg: "Desplegando versión / Deploying version: {{ app_version }}"
+
+  tasks:
+    - name: Crear directorio de aplicación / Create application directory
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Clonar o actualizar repositorio / Clone or update repository
+      git:
+        repo: "{{ app_repo }}"
+        dest: "{{ deploy_path }}"
+        version: "{{ app_version }}"
+        force: yes
+      notify: restart webserver
+
+    - name: Instalar dependencias / Install dependencies
+      # Este paso dependerá del tipo de aplicación
+      # This step depends on the application type
+      debug:
+        msg: "Instalar dependencias aquí / Install dependencies here"
+
+    - name: Verificar configuración / Verify configuration
+      debug:
+        msg: "Verificar archivos de configuración / Verify configuration files"
+
+  post_tasks:
+    - name: Verificar salud de la aplicación / Check application health
+      uri:
+        url: "http://{{ inventory_hostname }}/health"
+        status_code: 200
+      register: health_check
+      ignore_errors: yes
+
+    - name: Mostrar resultado / Show result
+      debug:
+        msg: "Despliegue completado en {{ inventory_hostname }} / Deployment completed on {{ inventory_hostname }}"
+
+  handlers:
+    - name: restart webserver
+      service:
+        name: nginx
+        state: restarted

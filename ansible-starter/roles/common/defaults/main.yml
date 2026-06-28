@@ -1,0 +1,5 @@
+---
+# Variables por defecto para el rol common / Default variables for common role
+
+create_deploy_user: false
+enable_firewall: true

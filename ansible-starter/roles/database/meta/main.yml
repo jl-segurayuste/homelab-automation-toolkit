@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: ansible-starter Team
+  description: Configuración de servidor de base de datos PostgreSQL / PostgreSQL database server configuration
+  company: ansible-starter
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+
+  galaxy_tags:
+    - database
+    - postgresql
+    - db
+
+dependencies:
+  - common

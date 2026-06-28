@@ -1,0 +1,11 @@
+---
+# Handlers para el rol common / Handlers for common role
+
+- name: restart sshd
+  service:
+    name: sshd
+    state: restarted
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes

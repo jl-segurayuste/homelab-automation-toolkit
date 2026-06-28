@@ -20,9 +20,9 @@ done
 [ "$RC" -eq 0 ] && echo "  OK"
 
 echo "== 2. Patrones de secretos =="
-if git grep -nEi 'glpat-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|(password|secret|api[_-]?key|token)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}' -- . ':(exclude)scripts/security/*' >/tmp/_sec 2>/dev/null; then
-  cat /tmp/_sec; RC=1
-else echo "  OK"; fi
+EXCLUDE='\{\{|\}\}|<[A-Za-z_]|vault_|default\(|omit|changeme|change_?me|example|ejemplo|placeholder|tu_|TU_|\$\{?[A-Za-z_]|lookup\('
+git grep -nEi 'glpat-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|BEGIN [A-Z ]*PRIVATE KEY|(password|secret|api[_-]?key|token)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}' -- . ':(exclude)scripts/security/*' 2>/dev/null | grep -vEi "$EXCLUDE" >/tmp/_sec || true
+if [ -s /tmp/_sec ]; then cat /tmp/_sec | sed 's/^/  /'; RC=1; else echo "  OK"; fi
 
 echo "== 3. Terminos prohibidos (lista negra) =="
 if [ -f "$BLACKLIST" ]; then

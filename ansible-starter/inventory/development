@@ -1,0 +1,12 @@
+# Inventario de Desarrollo / Development Inventory
+# ansible-starter
+
+[local]
+localhost ansible_connection=local
+
+[development:children]
+local
+
+[development:vars]
+ansible_python_interpreter=/usr/bin/python3
+env=development

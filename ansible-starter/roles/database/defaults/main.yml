@@ -1,0 +1,4 @@
+---
+# Variables por defecto para el rol database / Default variables for database role
+
+allow_external_db_access: false

@@ -1,0 +1,12 @@
+---
+# Handlers para el rol webserver / Handlers for webserver role
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted

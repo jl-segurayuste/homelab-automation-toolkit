@@ -1,0 +1,5 @@
+# Variables específicas por host / Host-specific variables
+#
+# Ejemplo / Example:
+# host_vars/web1.example.com.yml
+# host_vars/db1.example.com.yml

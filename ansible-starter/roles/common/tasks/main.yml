@@ -1,0 +1,64 @@
+---
+# Tareas comunes para todos los servidores / Common tasks for all servers
+# Role: common
+
+- name: Actualizar caché de paquetes / Update package cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Instalar paquetes comunes / Install common packages
+  apt:
+    name: "{{ common_packages }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Configurar timezone / Configure timezone
+  timezone:
+    name: "{{ timezone }}"
+
+- name: Asegurar que el hostname está configurado / Ensure hostname is set
+  hostname:
+    name: "{{ inventory_hostname_short }}"
+
+- name: Configurar servidores DNS / Configure DNS servers
+  template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: '0644'
+
+- name: Deshabilitar login de root / Disable root login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+  when: disable_root_login | bool
+  notify: restart sshd
+
+- name: Configurar autenticación por contraseña / Configure password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: "PasswordAuthentication {{ 'yes' if allow_password_authentication else 'no' }}"
+  notify: restart sshd
+
+- name: Asegurar que el firewall está configurado / Ensure firewall is configured
+  ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+
+- name: Permitir SSH en el firewall / Allow SSH in firewall
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Crear usuario de despliegue / Create deployment user
+  user:
+    name: deploy
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+  when: create_deploy_user | default(false) | bool

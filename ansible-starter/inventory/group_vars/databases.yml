@@ -1,0 +1,33 @@
+---
+# Variables para servidores de base de datos / Variables for database servers
+# ansible-starter
+
+# Base de datos / Database
+db_type: postgresql
+db_version: "14"
+db_port: 5432
+
+# Configuración de base de datos / Database configuration
+db_name: example_db
+db_user: app_user
+# IMPORTANTE: La contraseña debe estar en Ansible Vault
+# IMPORTANT: Password should be in Ansible Vault
+# db_password: "{{ vault_db_password }}"
+
+# Límites de recursos / Resource limits
+max_connections: 100
+shared_buffers: "256MB"
+effective_cache_size: "1GB"
+
+# Backup
+db_backup_enabled: true
+db_backup_schedule: "0 2 * * *"  # 2 AM daily
+db_backup_retention: 14  # days
+
+# Logs
+db_log_directory: /var/log/postgresql
+db_log_rotation: 7  # days
+
+# Replicación / Replication
+replication_enabled: false
+# replication_master: db1.example.com

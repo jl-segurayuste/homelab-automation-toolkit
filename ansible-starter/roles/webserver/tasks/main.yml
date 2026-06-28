@@ -1,0 +1,68 @@
+---
+# Tareas para servidor web / Web server tasks
+# Role: webserver
+
+- name: Instalar Nginx / Install Nginx
+  apt:
+    name: nginx
+    state: present
+  when: webserver_type == "nginx"
+
+- name: Asegurar que Nginx está iniciado / Ensure Nginx is started
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Permitir HTTP en el firewall / Allow HTTP in firewall
+  ufw:
+    rule: allow
+    port: "{{ webserver_port }}"
+    proto: tcp
+
+- name: Permitir HTTPS en el firewall / Allow HTTPS in firewall
+  ufw:
+    rule: allow
+    port: "{{ webserver_ssl_port }}"
+    proto: tcp
+  when: ssl_enabled | bool
+
+- name: Crear directorio de la aplicación / Create application directory
+  file:
+    path: "{{ app_root }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Configurar Nginx / Configure Nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: reload nginx
+
+- name: Configurar sitio por defecto / Configure default site
+  template:
+    src: default-site.conf.j2
+    dest: /etc/nginx/sites-available/default
+    mode: '0644'
+  notify: reload nginx
+
+- name: Habilitar sitio por defecto / Enable default site
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: reload nginx
+
+- name: Eliminar sitio por defecto de Nginx / Remove Nginx default site
+  file:
+    path: /var/www/html/index.nginx-debian.html
+    state: absent
+
+- name: Verificar configuración de Nginx / Verify Nginx configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0

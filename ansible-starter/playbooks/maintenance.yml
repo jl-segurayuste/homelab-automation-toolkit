@@ -1,0 +1,69 @@
+---
+# Playbook de mantenimiento / Maintenance playbook
+# ansible-starter
+#
+# Uso / Usage:
+# ansible-playbook -i inventory/production playbooks/maintenance.yml
+
+- name: Tareas de mantenimiento del sistema / System maintenance tasks
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Actualizar caché de paquetes / Update package cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Actualizar paquetes del sistema / Upgrade system packages
+      apt:
+        upgrade: safe
+      when: ansible_os_family == "Debian"
+
+    - name: Limpiar paquetes no utilizados / Remove unused packages
+      apt:
+        autoremove: yes
+        autoclean: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Verificar espacio en disco / Check disk space
+      shell: df -h
+      register: disk_space
+      changed_when: false
+
+    - name: Mostrar espacio en disco / Show disk space
+      debug:
+        var: disk_space.stdout_lines
+
+    - name: Rotar logs antiguos / Rotate old logs
+      command: logrotate -f /etc/logrotate.conf
+      changed_when: false
+
+    - name: Verificar servicios críticos / Check critical services
+      service_facts:
+      register: services_state
+
+    - name: Crear reporte de mantenimiento / Create maintenance report
+      debug:
+        msg: |
+          ===== Reporte de Mantenimiento / Maintenance Report =====
+          Host: {{ inventory_hostname }}
+          Fecha: {{ ansible_date_time.iso8601 }}
+          Sistema: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Uptime: {{ ansible_uptime_seconds | int // 86400 }} días
+          ==================================================
+
+- name: Backup de bases de datos / Database backup
+  hosts: databases
+  become: true
+
+  tasks:
+    - name: Crear directorio de backup / Create backup directory
+      file:
+        path: /var/backups/database
+        state: directory
+        mode: '0700'
+
+    - name: Ejecutar backup de base de datos / Execute database backup
+      debug:
+        msg: "Configurar backup de PostgreSQL/MySQL aquí / Configure PostgreSQL/MySQL backup here"

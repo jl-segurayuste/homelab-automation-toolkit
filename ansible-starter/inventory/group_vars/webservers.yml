@@ -1,0 +1,30 @@
+---
+# Variables para servidores web / Variables for web servers
+# ansible-starter
+
+# Servidor web / Web server
+webserver_type: nginx
+webserver_port: 80
+webserver_ssl_port: 443
+
+# Configuración de SSL/TLS
+ssl_enabled: true
+ssl_certificate_path: /etc/ssl/certs/example.crt
+ssl_certificate_key_path: /etc/ssl/private/example.key
+
+# Configuración de aplicación / Application configuration
+app_root: /var/www/html
+app_user: www-data
+app_group: www-data
+
+# Límites de recursos / Resource limits
+worker_processes: auto
+worker_connections: 1024
+
+# Caché
+enable_cache: true
+cache_duration: 3600
+
+# Logs
+access_log: /var/log/nginx/access.log
+error_log: /var/log/nginx/error.log
