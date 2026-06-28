@@ -48,7 +48,8 @@ desde playbooks contra hosts Windows (WinRM/SSH) con soporte de `--check`:
 | `win_ad_next_username` | Calcula el siguiente `SamAccountName` libre (solo lectura) |
 
 Ejemplo de playbook en [`examples/alta_usuario.yml`](examples/alta_usuario.yml). Documentación
-por módulo con `ansible-doc -M library win_ad_user`.
+por módulo con `ansible-doc -M library win_ad_user`. Para conectar con los hosts Windows por
+WinRM, consulta la guía [`docs/winrm-setup.md`](docs/winrm-setup.md).
 
 ```yaml
 - hosts: domain_controllers
