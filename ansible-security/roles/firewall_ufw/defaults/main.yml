@@ -1,0 +1,9 @@
+---
+# Politica por defecto y reglas de UFW (Debian/Ubuntu).
+ufw_default_incoming: deny
+ufw_default_outgoing: allow
+# Reglas: cada item admite port, proto (tcp/udp), from (CIDR opcional) y comment.
+ufw_rules:
+  - { port: 22, proto: tcp, from: "192.168.0.0/16", comment: "SSH red de confianza" }
+# Activar el logging de UFW
+ufw_logging: "on"

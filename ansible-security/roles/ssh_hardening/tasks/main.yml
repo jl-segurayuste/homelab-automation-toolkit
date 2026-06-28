@@ -1,0 +1,39 @@
+---
+# Aplica hardening de SSH de forma idempotente mediante drop-in en sshd_config.d.
+# Valida la configuracion antes de recargar para no dejar el host inaccesible.
+
+- name: Asegurar directorio de drop-ins de sshd
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    mode: "0755"
+
+- name: Desplegar drop-in de hardening SSH
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    mode: "0644"
+    validate: "sshd -t -f %s"
+    content: |
+      # Gestionado por Ansible (role ssh_hardening). No editar a mano.
+      PermitRootLogin {{ ssh_permit_root_login }}
+      PasswordAuthentication {{ ssh_password_authentication }}
+      PubkeyAuthentication {{ ssh_pubkey_authentication }}
+      PermitEmptyPasswords {{ ssh_permit_empty_passwords }}
+      X11Forwarding {{ ssh_x11_forwarding }}
+      MaxAuthTries {{ ssh_max_auth_tries }}
+      ClientAliveInterval {{ ssh_client_alive_interval }}
+      ClientAliveCountMax {{ ssh_client_alive_count_max }}
+      LoginGraceTime {{ ssh_login_grace_time }}
+      {% if ssh_allow_users | length > 0 %}
+      AllowUsers {{ ssh_allow_users | join(' ') }}
+      {% endif %}
+      {% if ssh_kex_algorithms %}
+      KexAlgorithms {{ ssh_kex_algorithms }}
+      {% endif %}
+      {% if ssh_ciphers %}
+      Ciphers {{ ssh_ciphers }}
+      {% endif %}
+      {% if ssh_macs %}
+      MACs {{ ssh_macs }}
+      {% endif %}
+  notify: Restart sshd

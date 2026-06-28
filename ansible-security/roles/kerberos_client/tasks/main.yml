@@ -1,0 +1,12 @@
+---
+- name: Instalar cliente Kerberos
+  ansible.builtin.package:
+    name: "{{ 'krb5-user' if ansible_os_family == 'Debian' else 'krb5-workstation' }}"
+    state: present
+
+- name: Desplegar /etc/krb5.conf (solo AES)
+  ansible.builtin.template:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+    mode: "0644"
+    backup: true

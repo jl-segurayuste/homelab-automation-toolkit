@@ -1,0 +1,14 @@
+---
+# Aplica parametros sysctl de seguridad de forma persistente e idempotente.
+
+- name: Aplicar parametros sysctl de seguridad
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-hardening.conf
+    sysctl_set: true
+    state: present
+    reload: true
+  loop: "{{ sysctl_hardening | dict2items }}"
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"

@@ -1,0 +1,34 @@
+---
+- name: Instalar ufw
+  ansible.builtin.package:
+    name: ufw
+    state: present
+
+- name: Politica por defecto (entrante)
+  community.general.ufw:
+    direction: incoming
+    policy: "{{ ufw_default_incoming }}"
+
+- name: Politica por defecto (saliente)
+  community.general.ufw:
+    direction: outgoing
+    policy: "{{ ufw_default_outgoing }}"
+
+- name: Reglas de UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port | string }}"
+    proto: "{{ item.proto | default('tcp') }}"
+    from_ip: "{{ item.from | default('any') }}"
+    comment: "{{ item.comment | default(omit) }}"
+  loop: "{{ ufw_rules }}"
+  loop_control:
+    label: "{{ item.comment | default(item.port) }}"
+
+- name: Logging de UFW
+  community.general.ufw:
+    logging: "{{ ufw_logging }}"
+
+- name: Habilitar UFW
+  community.general.ufw:
+    state: enabled

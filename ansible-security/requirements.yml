@@ -1,0 +1,6 @@
+---
+# Colecciones necesarias para estos roles.
+#   ansible-galaxy collection install -r requirements.yml
+collections:
+  - name: ansible.posix      # sysctl
+  - name: community.general  # ufw

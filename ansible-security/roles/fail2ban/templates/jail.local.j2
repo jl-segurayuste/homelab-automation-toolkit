@@ -1,0 +1,12 @@
+# Gestionado por Ansible (role fail2ban). No editar a mano.
+[DEFAULT]
+bantime = {{ fail2ban_bantime }}
+findtime = {{ fail2ban_findtime }}
+maxretry = {{ fail2ban_maxretry }}
+destemail = {{ fail2ban_destemail }}
+sender = {{ fail2ban_sender }}
+ignoreip = {{ fail2ban_ignoreip | join(' ') }}
+backend = systemd
+
+[sshd]
+enabled = {{ 'true' if fail2ban_sshd_enabled else 'false' }}

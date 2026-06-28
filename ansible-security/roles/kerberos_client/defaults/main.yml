@@ -1,0 +1,7 @@
+---
+# Configuracion del cliente Kerberos (krb5.conf) con cifrados FUERTES (solo AES).
+krb5_realm: "EXAMPLE.LAN"
+krb5_kdc: "dc1.example.lan"
+krb5_admin_server: "dc1.example.lan"
+krb5_ticket_lifetime: "10h"
+krb5_renew_lifetime: "7d"

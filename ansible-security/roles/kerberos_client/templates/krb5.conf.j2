@@ -1,0 +1,23 @@
+# Gestionado por Ansible (role kerberos_client). Solo cifrados AES.
+[libdefaults]
+    default_realm = {{ krb5_realm }}
+    dns_lookup_realm = false
+    dns_lookup_kdc = true
+    default_tgs_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+    default_tkt_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+    permitted_enctypes  = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+    ticket_lifetime = {{ krb5_ticket_lifetime }}
+    renew_lifetime  = {{ krb5_renew_lifetime }}
+    forwardable = true
+    rdns = false
+    allow_weak_crypto = false
+
+[realms]
+    {{ krb5_realm }} = {
+        kdc = {{ krb5_kdc }}
+        admin_server = {{ krb5_admin_server }}
+    }
+
+[domain_realm]
+    .{{ krb5_realm | lower }} = {{ krb5_realm }}
+    {{ krb5_realm | lower }} = {{ krb5_realm }}

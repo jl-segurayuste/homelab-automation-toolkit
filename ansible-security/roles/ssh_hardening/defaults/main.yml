@@ -1,0 +1,17 @@
+---
+# Opciones de hardening de SSH (sshd_config). Ajusta a tu entorno.
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"     # requiere tener claves SSH ya desplegadas
+ssh_pubkey_authentication: "yes"
+ssh_permit_empty_passwords: "no"
+ssh_x11_forwarding: "no"
+ssh_max_auth_tries: 3
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_login_grace_time: 30
+# Lista de usuarios permitidos por SSH (vacio = no se restringe con AllowUsers)
+ssh_allow_users: []
+# Algoritmos modernos (deja vacio para no forzarlos)
+ssh_kex_algorithms: "curve25519-sha256,curve25519-sha256@libssh.org"
+ssh_ciphers: "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com"
+ssh_macs: "hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com"

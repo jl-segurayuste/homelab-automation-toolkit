@@ -1,0 +1,83 @@
+---
+- name: Instalar paquetes de integracion con AD (realmd + SSSD)
+  ansible.builtin.package:
+    name: "{{ sssd_ad_packages[ansible_os_family] }}"
+    state: present
+  vars:
+    sssd_ad_packages:
+      Debian:
+        - realmd
+        - sssd
+        - sssd-tools
+        - libnss-sss
+        - libpam-sss
+        - adcli
+        - samba-common-bin
+        - oddjob
+        - oddjob-mkhomedir
+        - packagekit
+      RedHat:
+        - realmd
+        - sssd
+        - oddjob
+        - oddjob-mkhomedir
+        - adcli
+        - samba-common-tools
+        - krb5-workstation
+
+- name: Comprobar si el equipo ya esta unido al dominio
+  ansible.builtin.command: realm list --name-only
+  register: realm_joined
+  changed_when: false
+  failed_when: false
+
+- name: Validar que hay contrasena de union cuando hace falta unirse
+  ansible.builtin.assert:
+    that:
+      - ad_join_password is defined
+      - ad_join_password | length > 0
+    fail_msg: >-
+      Define ad_join_password (Ansible Vault o -e) para unir el equipo al dominio.
+  when: ad_domain | lower not in (realm_joined.stdout_lines | map('lower') | list)
+
+- name: Unir el equipo al dominio AD (idempotente)
+  ansible.builtin.command:
+    cmd: >-
+      realm join --user={{ ad_join_user }}
+      {{ ('--computer-ou=' ~ ad_computer_ou) if (ad_computer_ou | length > 0) else '' }}
+      {{ ad_domain | lower }}
+    stdin: "{{ ad_join_password }}"
+  when: ad_domain | lower not in (realm_joined.stdout_lines | map('lower') | list)
+  no_log: true
+  notify: Restart sssd
+
+- name: Desplegar /etc/sssd/sssd.conf
+  ansible.builtin.template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: "0600"
+    backup: true
+  notify: Restart sssd
+
+- name: Habilitar creacion automatica del home (pam_mkhomedir)
+  ansible.builtin.command: pam-auth-update --enable mkhomedir
+  when: ansible_os_family == 'Debian'
+  changed_when: false
+
+- name: Configurar sudo para grupos de AD
+  ansible.builtin.template:
+    src: sudo_ad_groups.j2
+    dest: /etc/sudoers.d/ad_groups
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+  when: sssd_sudo_groups | length > 0
+
+- name: Asegurar que SSSD esta habilitado y arrancado
+  ansible.builtin.service:
+    name: sssd
+    state: started
+    enabled: true

@@ -1,0 +1,18 @@
+---
+- name: Instalar auditd
+  ansible.builtin.package:
+    name: "{{ 'auditd' if ansible_os_family == 'Debian' else 'audit' }}"
+    state: present
+
+- name: Desplegar reglas base de auditd
+  ansible.builtin.copy:
+    src: baseline.rules
+    dest: /etc/audit/rules.d/99-baseline.rules
+    mode: "0640"
+  notify: Reload auditd rules
+
+- name: Habilitar y arrancar auditd
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: true

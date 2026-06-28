@@ -1,0 +1,35 @@
+---
+# Integracion de clientes Linux con Active Directory mediante realmd + SSSD.
+# IMPORTANTE: la contrasena de union NO se guarda aqui. Pasala en tiempo de
+# ejecucion con Ansible Vault o -e y nunca la commitees.
+
+# Dominio AD. Se usa en minusculas para SSSD y en mayusculas para el realm Kerberos.
+ad_domain: "EXAMPLE.LAN"
+
+# Cuenta con permiso para unir equipos al dominio.
+ad_join_user: "Administrator"
+
+# Contrasena de union: definir en vault o con -e "ad_join_password=...".
+# Se deja sin valor a proposito para no almacenar secretos en el repo.
+# ad_join_password: ""
+
+# OU donde crear la cuenta de equipo (opcional, vacio = contenedor por defecto).
+ad_computer_ou: ""
+
+# Grupos de AD autorizados a iniciar sesion (control de acceso de SSSD).
+# Vacio = cualquier usuario del dominio puede entrar (access_provider = ad).
+sssd_allowed_groups: []
+#   - "linux-admins"
+#   - "linux-users"
+
+# Grupos de AD que reciben permisos sudo. nopasswd opcional (por defecto false).
+sssd_sudo_groups: []
+#   - { name: "linux-admins", nopasswd: true }
+#   - { name: "linux-operators" }
+
+# Opciones de SSSD.
+sssd_use_fully_qualified_names: false   # true => usuario@dominio para iniciar sesion
+sssd_fallback_homedir: "/home/%u"
+sssd_default_shell: "/bin/bash"
+sssd_enumerate: false                   # true degrada el rendimiento en dominios grandes
+sssd_ldap_id_mapping: true              # mapeo automatico SID -> UID/GID

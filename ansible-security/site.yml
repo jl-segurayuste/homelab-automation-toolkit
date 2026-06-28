@@ -1,0 +1,27 @@
+---
+# Baseline de seguridad para servidores Linux (Debian/Ubuntu).
+# Aplica los roles de forma idempotente. Revisa los defaults de cada rol y
+# sobrescribelos en group_vars/host_vars segun tu entorno.
+#
+#   ansible-playbook -i inventory.ini site.yml
+#   ansible-playbook -i inventory.ini site.yml --tags ssh,firewall --check
+- name: Baseline de seguridad Linux
+  hosts: all
+  become: true
+  roles:
+    - { role: sysctl_hardening, tags: [sysctl, hardening] }
+    - { role: ssh_hardening, tags: [ssh, hardening] }
+    - { role: firewall_ufw, tags: [firewall] }
+    - { role: fail2ban, tags: [fail2ban] }
+    - { role: auditd, tags: [auditd, audit] }
+    - { role: unattended_upgrades, tags: [updates] }
+
+# Integracion con el dominio (solo en los hosts que se unen a AD).
+# kerberos_client deja /etc/krb5.conf (solo AES) y sssd_ad une el equipo
+# con realmd + SSSD y gestiona acceso y sudo por grupos de AD.
+- name: Integracion con Active Directory (Kerberos + SSSD)
+  hosts: domain_clients
+  become: true
+  roles:
+    - { role: kerberos_client, tags: [kerberos] }
+    - { role: sssd_ad, tags: [sssd, ad] }

@@ -1,0 +1,4 @@
+# Gestionado por Ansible (role sssd_ad). Sudo para grupos de Active Directory.
+{% for g in sssd_sudo_groups %}
+%{{ g.name | replace(' ', '\\ ') }} ALL=(ALL:ALL) {{ 'NOPASSWD: ALL' if (g.nopasswd | default(false)) else 'ALL' }}
+{% endfor %}

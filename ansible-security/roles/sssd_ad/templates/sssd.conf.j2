@@ -1,0 +1,22 @@
+# Gestionado por Ansible (role sssd_ad). No editar a mano.
+[sssd]
+domains = {{ ad_domain | lower }}
+config_file_version = 2
+services = nss, pam
+
+[domain/{{ ad_domain | lower }}]
+id_provider = ad
+access_provider = {{ 'simple' if (sssd_allowed_groups | length > 0) else 'ad' }}
+ad_domain = {{ ad_domain | lower }}
+krb5_realm = {{ ad_domain | upper }}
+realmd_tags = manages-system joined-with-adcli
+cache_credentials = true
+krb5_store_password_if_offline = true
+default_shell = {{ sssd_default_shell }}
+fallback_homedir = {{ sssd_fallback_homedir }}
+use_fully_qualified_names = {{ sssd_use_fully_qualified_names | ternary('True', 'False') }}
+ldap_id_mapping = {{ sssd_ldap_id_mapping | ternary('True', 'False') }}
+enumerate = {{ sssd_enumerate | ternary('True', 'False') }}
+{% if sssd_allowed_groups | length > 0 %}
+simple_allow_groups = {{ sssd_allowed_groups | join(', ') }}
+{% endif %}
