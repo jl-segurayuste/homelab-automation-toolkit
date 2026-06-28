@@ -1,0 +1,16 @@
+---
+# Politica de contrasenas del dominio (valores recomendados de partida).
+dc_pw_complexity: "on"
+dc_pw_min_length: 14
+dc_pw_history_length: 24
+dc_pw_max_age_days: 90
+dc_pw_min_age_days: 1
+dc_account_lockout_threshold: 5
+dc_account_lockout_duration_mins: 30
+
+# Grupos privilegiados a auditar (se listan sus miembros).
+dc_privileged_groups:
+  - "Domain Admins"
+  - "Enterprise Admins"
+  - "Schema Admins"
+  - "Administrators"

@@ -1,0 +1,28 @@
+---
+# Reconcilia los usuarios del dominio Samba AD usando el modulo propio samba_ad_user.
+# Ejecutar en el propio DC (samba-tool local).
+
+- name: Asegurar usuarios del dominio
+  samba_ad_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | default(omit) }}"
+    given_name: "{{ item.given_name | default(omit) }}"
+    surname: "{{ item.surname | default(omit) }}"
+    mail: "{{ item.mail | default(omit) }}"
+    description: "{{ item.description | default(omit) }}"
+    enabled: "{{ item.enabled | default(true) }}"
+    must_change_password: "{{ item.must_change_password | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ dc_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true   # evita exponer contrasenas en la salida
+
+- name: Asegurar pertenencia a grupos declarada por usuario
+  samba_ad_group:
+    name: "{{ item.1 }}"
+    members: ["{{ item.0.name }}"]
+    state: present
+  loop: "{{ dc_users | subelements('groups', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.name }} -> {{ item.1 }}"

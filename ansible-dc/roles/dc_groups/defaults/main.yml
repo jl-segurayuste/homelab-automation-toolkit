@@ -1,0 +1,8 @@
+---
+# Grupos a gestionar en el Domain Controller (Samba AD).
+dc_groups: []
+#   - name: BackupOperators
+#     members: [jdoe, asmith]
+#     purge_members: true     # quita del grupo a quien no este en members
+#   - name: ObsoleteGroup
+#     state: absent

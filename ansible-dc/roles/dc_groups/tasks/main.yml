@@ -1,0 +1,12 @@
+---
+# Reconcilia grupos y su membresia usando el modulo propio samba_ad_group.
+
+- name: Asegurar grupos del dominio y su membresia
+  samba_ad_group:
+    name: "{{ item.name }}"
+    members: "{{ item.members | default([]) }}"
+    purge_members: "{{ item.purge_members | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ dc_groups }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,27 @@
+---
+# Ejemplo de datos para los roles dc_users / dc_groups.
+# Copia a group_vars/domain_controllers.yml y cifra las contrasenas con Ansible Vault:
+#   ansible-vault encrypt_string 'CONTRASENA' --name 'vault_jdoe_password'
+
+dc_groups:
+  - name: BackupOperators
+    members: [jdoe, asmith]
+    purge_members: true
+
+dc_users:
+  - name: jdoe
+    given_name: Juan
+    surname: Doe
+    mail: jdoe@example.lan
+    password: "{{ vault_jdoe_password }}"
+    enabled: true
+    must_change_password: true
+    groups: [BackupOperators]
+
+  - name: asmith
+    given_name: Ana
+    surname: Smith
+    mail: asmith@example.lan
+    password: "{{ vault_asmith_password }}"
+    enabled: true
+    must_change_password: true

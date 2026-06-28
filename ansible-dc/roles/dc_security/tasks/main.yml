@@ -1,0 +1,34 @@
+---
+# Aplica politica de contrasenas y audita grupos privilegiados en un Samba AD DC.
+
+- name: Aplicar politica de contrasenas del dominio
+  ansible.builtin.command:
+    argv:
+      - samba-tool
+      - domain
+      - passwordsettings
+      - set
+      - "--complexity={{ dc_pw_complexity }}"
+      - "--min-pwd-length={{ dc_pw_min_length }}"
+      - "--history-length={{ dc_pw_history_length }}"
+      - "--max-pwd-age={{ dc_pw_max_age_days }}"
+      - "--min-pwd-age={{ dc_pw_min_age_days }}"
+      - "--account-lockout-threshold={{ dc_account_lockout_threshold }}"
+      - "--account-lockout-duration={{ dc_account_lockout_duration_mins }}"
+  register: dc_pw_apply
+  changed_when: "'changed' in (dc_pw_apply.stdout | lower) or dc_pw_apply.rc == 0"
+
+- name: Auditar miembros de grupos privilegiados
+  ansible.builtin.command:
+    argv: [samba-tool, group, listmembers, "{{ item }}"]
+  loop: "{{ dc_privileged_groups }}"
+  register: dc_priv_members
+  changed_when: false
+  failed_when: false
+
+- name: Mostrar miembros de grupos privilegiados (revisa minimo privilegio)
+  ansible.builtin.debug:
+    msg: "{{ item.item }}: {{ item.stdout_lines | default([]) }}"
+  loop: "{{ dc_priv_members.results }}"
+  loop_control:
+    label: "{{ item.item }}"

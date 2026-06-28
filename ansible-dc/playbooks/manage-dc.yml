@@ -1,0 +1,14 @@
+---
+# Gestiona usuarios y grupos del Domain Controller y aplica la politica de seguridad.
+# Se ejecuta CONTRA EL PROPIO DC (samba-tool es local).
+#
+#   ansible-playbook -i ../inventory.example.ini playbooks/manage-dc.yml \
+#       --ask-vault-pass
+- name: Gestion del Domain Controller (Samba AD)
+  hosts: domain_controllers
+  become: true
+  gather_facts: false
+  roles:
+    - role: dc_groups   # primero los grupos
+    - role: dc_users    # luego usuarios y su pertenencia
+    - role: dc_security # politica de contrasenas + auditoria de privilegios

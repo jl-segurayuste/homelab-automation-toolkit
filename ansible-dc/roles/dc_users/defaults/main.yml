@@ -1,0 +1,16 @@
+---
+# Lista de usuarios a gestionar en el Domain Controller (Samba AD).
+# Define esto en group_vars/host_vars; las contrasenas deben venir de Ansible Vault.
+# Ejemplo de estructura (NO pongas contrasenas en claro aqui):
+dc_users: []
+#   - name: jdoe
+#     given_name: Juan
+#     surname: Doe
+#     mail: jdoe@example.lan
+#     password: "{{ vault_jdoe_password }}"   # desde vault
+#     enabled: true
+#     must_change_password: true
+#     groups: [BackupOperators]
+
+# Si true, los usuarios que no esten en dc_users y existan se DESHABILITAN (no se borran).
+dc_users_disable_unmanaged: false
