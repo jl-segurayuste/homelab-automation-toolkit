@@ -71,6 +71,38 @@ WinRM, consulta la guía [`docs/winrm-setup.md`](docs/winrm-setup.md).
 Las funciones PowerShell originales (dot-sourcing) se conservan como alternativa para uso
 interactivo; los módulos son la forma idiomática para Ansible.
 
+## Cómo probar
+
+Validación rápida en el controller Linux (sin host Windows):
+
+```bash
+# La documentacion de cada modulo parsea correctamente
+ansible-doc -M library win_ad_user
+```
+
+Prueba real contra un Windows unido al dominio (ver [`docs/winrm-setup.md`](docs/winrm-setup.md)):
+
+```bash
+pip install "pywinrm[credssp]"
+
+# 1) Conectividad
+ansible -i inventory.ini windows -m ansible.windows.win_ping
+
+# 2) En seco (no aplica cambios) y luego de verdad
+ansible-playbook -i inventory.ini examples/alta_usuario.yml --check
+ansible-playbook -i inventory.ini examples/alta_usuario.yml
+```
+
+Comprobaciones recomendadas:
+
+- El host Windows tiene el módulo `ActiveDirectory` (RSAT) y la cuenta de WinRM tiene
+  permisos sobre la OU objetivo.
+- **Idempotencia**: ejecuta el playbook dos veces; la segunda debe salir `ok`, no `changed`.
+- Las contraseñas (parámetro `password` o `generate_password`) van siempre con `no_log: true`.
+
+> Nota: estos módulos están escritos en PowerShell y requieren ejecutarse contra Windows;
+> la sintaxis PowerShell debe validarse en un host con `pwsh`/RSAT antes de producción.
+
 ## Notas de seguridad
 
 - No incrustes contraseñas: genera con `Generate-RandomPassword` o pásalas como `SecureString`.
