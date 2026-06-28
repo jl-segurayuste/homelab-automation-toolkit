@@ -28,6 +28,9 @@ reutilizables y sin datos sensibles.
 | `linux-audit/` | Auditoría de seguridad de hosts Linux (solo lectura, estilo CIS) y reglas base de `auditd` |
 | `incident-response/` | Respuesta a incidentes (solo lectura): triaje de estado volátil y caza de mecanismos de persistencia |
 | `web-form/` | Ejemplo didáctico de formulario web PHP con conexión a BD |
+| `ansible-security/` | Baseline de seguridad declarativa con Ansible (sysctl, SSH, UFW, fail2ban, auditd, updates) + integración con AD (Kerberos + SSSD/realmd, sudo por grupos) |
+| `bash-toolkit/` | Librerías reutilizables para scripts Bash robustos: plantilla con logging/HTTP/validaciones/temporales y funciones de monitorización (Nagios/Icinga) |
+| `network-tools/` | Utilidades de diagnóstico de red: diagnóstico de IPs (ping/nmap/curl/traceroute/whois), comparación de escaneos y listas de exclusión |
 
 ## Normas del repositorio (forzadas por hook pre-commit)
 
