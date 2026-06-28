@@ -16,6 +16,10 @@ reutilizables y sin datos sensibles.
 | `ansible-starter/` | Plantilla genérica de proyecto Ansible (roles common/database/webserver, inventarios, playbooks) |
 | `hardening/` | Endurecimiento básico de servidores Linux (sysctl, UFW, fail2ban, rkhunter, SSH, unattended-upgrades) |
 | `maintenance/` | Mantenimiento de servidores: limpieza de containerd/K3s y dumps de bases de datos en Docker |
+| `kerberos-linux-dc/` | Controlador de Dominio en Linux (Samba AD + Kerberos): provisión, hardening de cifrados y auditoría (incl. keytabs no-AES) |
+| `ad-powershell/` | Administración segura de usuarios/grupos de Active Directory con atributos POSIX (PowerShell) |
+| `ansible-dc/` | Módulos Ansible propios (`samba_ad_user`/`samba_ad_group`) y roles para gestionar usuarios/grupos del DC |
+| `docker/` | Instalación, hardening y gestión de contenedores Docker con Ansible + auditoría de seguridad (CIS) |
 | `web-form/` | Ejemplo didáctico de formulario web PHP con conexión a BD |
 
 ## Normas del repositorio (forzadas por hook pre-commit)
