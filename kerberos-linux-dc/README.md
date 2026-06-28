@@ -12,6 +12,8 @@ buenas prácticas desde el primer minuto.
 | `audit-keytabs-noaes.sh` | Recorre una flota de servidores por SSH y detecta keytabs con cifrado débil (no-AES: RC4/DES); genera CSV. Solo lectura |
 | `detect-kerberoast.sh` | Detección defensiva (solo lectura): cuentas Kerberoastables (SPN), AS-REP roastables (sin preautenticación) y con RC4/sin AES |
 | `rotate-krbtgt.sh` | Rota la contraseña de `krbtgt` (mitiga Golden Ticket); guía para ejecutarla dos veces con margen |
+| `generate-keytab.sh` | Genera un keytab para un principal **forzando solo AES** (modo Samba DC con `samba-tool` o modo cliente con `ktutil`); permisos `600` |
+| `krb-ticket-renew.sh` | Renovación automática de TGT (re-`kinit` desde keytab o `kinit -R`); para cron o `systemd.timer` |
 
 ## Uso
 
@@ -24,6 +26,34 @@ sudo REALM=EXAMPLE.LAN KDC=dc1.example.lan bash harden-kerberos.sh
 
 # 3. Auditar
 sudo bash kerberos-security-audit.sh
+```
+
+## Keytab y renovación automática de tickets
+
+```bash
+# Generar un keytab (en el DC, solo AES) para una cuenta de servicio
+sudo bash generate-keytab.sh host/web1.example.lan /etc/krb5.keytab --samba
+
+# Renovar el ticket automáticamente desde el keytab
+sudo KEYTAB=/etc/krb5.keytab PRINCIPAL=host/web1.example.lan bash krb-ticket-renew.sh
+```
+
+Ejemplo de `systemd.timer` para renovar cada 6 horas
+(`/etc/systemd/system/krb-renew.service` y `krb-renew.timer`):
+
+```ini
+# krb-renew.service
+[Service]
+Type=oneshot
+Environment=KEYTAB=/etc/krb5.keytab PRINCIPAL=host/web1.example.lan
+ExecStart=/usr/local/bin/krb-ticket-renew.sh
+
+# krb-renew.timer
+[Timer]
+OnCalendar=*-*-* 00/6:00:00
+Persistent=true
+[Install]
+WantedBy=timers.target
 ```
 
 ## Notas de seguridad
