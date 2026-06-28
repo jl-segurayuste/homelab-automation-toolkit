@@ -1,0 +1,15 @@
+# Plantilla de lista negra. COPIA este archivo a 'blacklist.local.txt'
+# (que está gitignored) y añade ahí los términos reales que NO deben aparecer
+# en el repo: nombres de empresas, clientes, productos internos, dominios, etc.
+#
+#   cp blacklist.example.txt blacklist.local.txt
+#
+# El hook pre-commit y scan-repo.sh leen 'blacklist.local.txt' si existe.
+# Una entrada por línea. Comparación insensible a mayúsculas y por palabra completa.
+# NO incluyas aquí el nombre del autor del repo.
+#
+# Ejemplos (sustituye por los tuyos):
+# nombre-empresa
+# nombre-cliente
+# producto-interno
+# dominio-privado.local

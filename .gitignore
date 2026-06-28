@@ -1,0 +1,41 @@
+# === Secretos / credenciales (NUNCA versionar) ===
+*.env
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.gpg
+*.ovpn
+id_rsa*
+id_ed25519*
+*_rsa
+*_ed25519
+known_hosts
+credentials*
+secrets*
+*secret*.yaml
+*secret*.yml
+vault-keys*
+*.kdbx
+
+# === Inventarios reales (solo se publican ejemplos) ===
+inventory/host_vars/
+inventory/production
+inventory/staging
+!inventory/*.example
+
+# === Internos (NO publicar) ===
+scripts/security/blacklist.local.txt
+RETOMAR.md
+
+# === Ruido ===
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.DS_Store
+*.log

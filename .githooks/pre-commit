@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Hook pre-commit autonomo (solo bash + grep, sin dependencias externas).
+# Bloquea el commit si detecta:
+#   1) Patrones de secretos (tokens, claves privadas, passwords incrustadas).
+#   2) Terminos de la lista negra (nombres de empresas/clientes/productos de origen).
+#   3) Iconos / emojis en archivos de script (cualquier lenguaje).
+# Saltarse el hook (NO recomendado): git commit --no-verify
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+BLACKLIST="$REPO_ROOT/scripts/security/blacklist.local.txt"
+FAIL=0
+
+# Solo archivos staged que se anaden/modifican (no borrados)
+mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACM)
+[ ${#FILES[@]} -eq 0 ] && exit 0
+
+# Rango Unicode de iconos/emojis (pictogramas, emoticonos, dingbats, simbolos, VS16, ZWJ)
+ICON_RANGE='[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{FE00}-\x{FE0F}\x{200D}\x{2190}-\x{21FF}\x{2300}-\x{23FF}\x{2460}-\x{24FF}]'
+
+is_script() {
+  case "$1" in
+    *.sh|*.bash|*.zsh|*.py|*.pl|*.rb|*.js|*.ts|*.ps1|*.lua|*.php|*.yaml|*.yml|*.j2) return 0 ;;
+  esac
+  # shebang en la primera linea -> es script
+  git show ":$1" 2>/dev/null | head -1 | grep -qE '^#!' && return 0
+  return 1
+}
+
+for f in "${FILES[@]}"; do
+  [ -f "$f" ] || continue
+
+  # --- 1) Patrones de secretos (en todos los archivos) ---
+  for pat in \
+    'glpat-[A-Za-z0-9_-]{20,}' \
+    'gh[pousr]_[A-Za-z0-9]{30,}' \
+    'AKIA[0-9A-Z]{16}' \
+    '-----BEGIN [A-Z ]*PRIVATE KEY-----' \
+    'xox[baprs]-[0-9A-Za-z-]{10,}' \
+    '(password|passwd|pwd|secret|api[_-]?key|token)[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"']{6,}'
+  do
+    if git show ":$f" 2>/dev/null | grep -nEi "$pat" >/dev/null 2>&1; then
+      echo "[SECRETO] posible secreto en '$f' (patron: $pat)"
+      git show ":$f" | grep -nEi "$pat" | sed 's/^/      /' | head -3
+      FAIL=1
+    fi
+  done
+
+  # --- 3) Iconos/emojis SOLO en scripts ---
+  if is_script "$f"; then
+    if git show ":$f" 2>/dev/null | grep -nP "$ICON_RANGE" >/dev/null 2>&1; then
+      echo "[ICONO] el script '$f' contiene iconos/emojis (prohibido en scripts):"
+      git show ":$f" | grep -nP "$ICON_RANGE" | sed 's/^/      /' | head -5
+      FAIL=1
+    fi
+  fi
+done
+
+# --- 2) Lista negra de terminos confidenciales (en todos los archivos) ---
+if [ -f "$BLACKLIST" ]; then
+  while IFS= read -r term; do
+    [[ -z "$term" || "$term" =~ ^# ]] && continue
+    for f in "${FILES[@]}"; do
+      [ -f "$f" ] || continue
+      # La propia lista negra contiene los terminos por definicion: excluirla.
+      case "$f" in scripts/security/blacklist.*) continue ;; esac
+      if git show ":$f" 2>/dev/null | grep -nwiE "$term" >/dev/null 2>&1; then
+        echo "[PROHIBIDO] termino '$term' en '$f' (confidencialidad)"
+        FAIL=1
+      fi
+    done
+  done < "$BLACKLIST"
+fi
+
+if [ "$FAIL" -ne 0 ]; then
+  echo ""
+  echo "Commit BLOQUEADO. Revisa los hallazgos de arriba."
+  echo "Si es un falso positivo justificado: git commit --no-verify"
+  exit 1
+fi
+echo "pre-commit OK: sin secretos, sin terminos prohibidos, sin iconos en scripts."
+exit 0
