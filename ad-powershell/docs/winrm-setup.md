@@ -27,7 +27,7 @@ las credenciales en **Ansible Vault** o pásalas con `-e`.
 
 ```ini
 [windows]
-win-server01 ansible_host=192.168.1.100
+win-server01 ansible_host=192.0.2.10
 
 [windows:vars]
 ansible_connection=winrm
