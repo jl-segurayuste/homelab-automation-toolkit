@@ -4,6 +4,7 @@
 SNAPSHOT_NAME="snap_root_$(date +%Y%m%d)"
 SNAPSHOT_SIZE="20G"
 MOUNT_POINT="/mnt/backup_local/snapshots/lvm/${SNAPSHOT_NAME}"
+# shellcheck disable=SC2034  # lo usa la línea opcional de dd, comentada más abajo
 BACKUP_FILE="/mnt/backup_local/snapshots/root_snapshot_$(date +%Y%m%d).img.gz"
 
 echo "$(date): Creando snapshot LVM de /" | tee -a /mnt/backup_local/logs/backup.log

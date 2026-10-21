@@ -2,6 +2,7 @@
 # Archivo: /mnt/backup_local/scripts/backup_monitor.sh
 
 BACKUP_DIR="/mnt/backup_local"
+STATUS=0   # != 0 si algo falla: quien lo lance (cron, monitorización) se entera
 LOG="${BACKUP_DIR}/logs/backup.log"
 
 echo "========================================"
@@ -49,8 +50,10 @@ if [ -f "${LATEST_ETC}" ]; then
         echo "[OK] Backup /etc íntegro"
     else
         echo "[X] ERROR: Backup /etc corrupto"
+        STATUS=1
     fi
 fi
 
 echo ""
 echo "========================================"
+exit "$STATUS"

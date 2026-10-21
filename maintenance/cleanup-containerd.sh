@@ -24,7 +24,7 @@ echo "Eliminando imagenes no utilizadas..."
 sudo crictl rmi --prune 2>/dev/null || sudo k3s crictl rmi --prune
 
 echo "Eliminando contenedores parados..."
-sudo crictl rm $(sudo crictl ps -a -q) 2>/dev/null || true
+sudo crictl ps -a -q | xargs -r sudo crictl rm 2>/dev/null || true
 
 echo "Limpiando ingest/cache de containerd..."
 sudo rm -rf /var/lib/rancher/k3s/agent/containerd/io.containerd.content.v1.content/ingest/* 2>/dev/null || true

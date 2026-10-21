@@ -47,7 +47,7 @@ susp_suid=$(find / -xdev -type f -perm -4000 2>/dev/null | grep -vE '^/(usr/bin|
 [[ -n "$susp_suid" ]] && { flag "SUID en rutas no estandar:"; echo "$susp_suid" | sed 's/^/    /'; } || okay "SUID solo en rutas estandar"
 
 # 8. Procesos ejecutando desde rutas temporales
-susp_proc=$(ls -l /proc/*/exe 2>/dev/null | grep -E '/tmp/|/dev/shm/|/var/tmp/' | head)
+susp_proc=$(for e in /proc/[0-9]*/exe; do t=$(readlink "$e" 2>/dev/null) || continue; case "$t" in /tmp/*|/dev/shm/*|/var/tmp/*) echo "${e%/exe} -> $t" ;; esac; done | head)
 [[ -n "$susp_proc" ]] && { flag "Procesos ejecutando desde rutas temporales:"; echo "$susp_proc" | sed 's/^/    /'; } || okay "Sin procesos desde /tmp"
 
 echo "----------------------------------------"

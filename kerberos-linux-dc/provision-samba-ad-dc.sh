@@ -32,7 +32,7 @@ echo "[*] Deteniendo servicios que interfieren con el DC..."
 systemctl disable --now smbd nmbd winbind 2>/dev/null || true
 
 # Backups de configs previas
-[[ -f /etc/samba/smb.conf ]] && mv /etc/samba/smb.conf /etc/samba/smb.conf.bak.$(date +%s)
+[[ -f /etc/samba/smb.conf ]] && mv /etc/samba/smb.conf "/etc/samba/smb.conf.bak.$(date +%s)"
 
 echo "[*] Provisionando dominio..."
 samba-tool domain provision \

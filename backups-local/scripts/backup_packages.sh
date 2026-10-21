@@ -16,7 +16,7 @@ dpkg --get-selections > "${BACKUP_DIR}/all_packages_${DATE}.txt"
 sudo cp -a /etc/apt/sources.list* "${BACKUP_DIR}/sources_${DATE}/"
 
 # Claves APT
-sudo apt-key exportall > "${BACKUP_DIR}/apt_keys_${DATE}.txt"
+sudo apt-key exportall | sudo tee "${BACKUP_DIR}/apt_keys_${DATE}.txt" >/dev/null
 
 # Mantener solo últimas 10 versiones
 cd "${BACKUP_DIR}" || exit 1

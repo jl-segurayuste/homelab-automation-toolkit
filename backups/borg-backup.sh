@@ -12,7 +12,8 @@ set -euo pipefail
 export BORG_REPO="${BORG_REPO:?Define BORG_REPO}"
 PASS_FILE="${BORG_PASSPHRASE_FILE:?Define BORG_PASSPHRASE_FILE (fichero 600)}"
 [[ -f "$PASS_FILE" ]] || { echo "[ERROR] No existe $PASS_FILE" >&2; exit 1; }
-export BORG_PASSPHRASE="$(cat "$PASS_FILE")"
+BORG_PASSPHRASE="$(cat "$PASS_FILE")"
+export BORG_PASSPHRASE
 BACKUP_PATHS="${BACKUP_PATHS:-/etc /home /var/www}"
 KEEP_DAILY="${KEEP_DAILY:-7}"
 KEEP_WEEKLY="${KEEP_WEEKLY:-4}"

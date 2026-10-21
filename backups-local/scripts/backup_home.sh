@@ -32,7 +32,8 @@ if [ $? -eq 0 ]; then
 
     # Mantener últimos 14 días
     cd "${BACKUP_DIR}" || exit 1
-    ls -t | grep -E '^[0-9]{8}$' | tail -n +15 | xargs -r rm -rf
+    find . -maxdepth 1 -type d -regextype posix-extended -regex './[0-9]{8}' -printf '%f\n' \
+        | sort -r | tail -n +15 | xargs -r rm -rf --
 else
     echo "$(date): [X] ERROR en backup de /home" | tee -a ${LOG}
 fi
