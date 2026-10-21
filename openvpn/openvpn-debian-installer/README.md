@@ -52,13 +52,13 @@ unbound          # DNS resolver local (solo si se selecciona opción DNS=2)
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/openvpn-install.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/openvpn-debian-installer/openvpn-debian-installer.sh
 
 # Dar permisos de ejecución
-chmod +x openvpn-install.sh
+chmod +x openvpn-debian-installer.sh
 
 # Ejecutar como root
-sudo ./openvpn-install.sh
+sudo ./openvpn-debian-installer.sh
 ```
 
 El script te guiará paso a paso por todas las opciones de configuración.
@@ -66,7 +66,7 @@ El script te guiará paso a paso por todas las opciones de configuración.
 ### Modo Automático (Sin Interacción)
 
 ```bash
-sudo AUTO_INSTALL=y ./openvpn-install.sh
+sudo AUTO_INSTALL=y ./openvpn-debian-installer.sh
 ```
 
 Esto instalará OpenVPN con la configuración recomendada:
@@ -118,7 +118,7 @@ sudo AUTO_INSTALL=y \
      DNS=4 \
      IPV6_SUPPORT=y \
      CLIENT=usuario1 \
-     ./openvpn-install.sh
+     ./openvpn-debian-installer.sh
 ```
 
 ## Configuración de Cifrado
@@ -155,7 +155,7 @@ Si estableces `CUSTOMIZE_ENC=y`, podrás elegir:
 ### Añadir Nuevos Clientes
 
 ```bash
-sudo ./openvpn-install.sh
+sudo ./openvpn-debian-installer.sh
 ```
 
 Selecciona la opción 1 del menú y proporciona:
@@ -167,7 +167,7 @@ El archivo `.ovpn` se generará en `/root/` o `/home/usuario/`
 ### Revocar Certificados
 
 ```bash
-sudo ./openvpn-install.sh
+sudo ./openvpn-debian-installer.sh
 ```
 
 Selecciona la opción 2 y elige el cliente a revocar. El certificado se agregará a la CRL (Certificate Revocation List) inmediatamente.
@@ -345,7 +345,7 @@ mssfix 1450
 ## Desinstalación
 
 ```bash
-sudo ./openvpn-install.sh
+sudo ./openvpn-debian-installer.sh
 ```
 
 Selecciona la opción 3 del menú. El script eliminará:
@@ -465,7 +465,7 @@ sudo apt install openvpn-auth-pam
 ### Reportar Problemas
 
 Si encuentras algún problema:
-1. Ejecuta con logs detallados: `sudo bash -x ./openvpn-install.sh`
+1. Ejecuta con logs detallados: `sudo bash -x ./openvpn-debian-installer.sh`
 2. Revisa `/var/log/openvpn/` y `journalctl -u openvpn@server`
 3. Verifica requisitos del sistema
 
@@ -476,7 +476,10 @@ Este script está basado y optimizado a partir de:
 
 ### Licencia
 
-GPL-3.0 - Ver archivo LICENSE para detalles
+MIT. El script deriva de [angristan/openvpn-install](https://github.com/angristan/openvpn-install)
+(Copyright (c) 2013 Nyr, Copyright (c) 2016 Stanislas Lange), también MIT: su aviso de copyright y
+licencia están en [`LICENSE-angristan`](LICENSE-angristan). Las modificaciones van bajo la
+[licencia del repositorio](../../LICENSE).
 
 ## Changelog
 
@@ -493,5 +496,5 @@ GPL-3.0 - Ver archivo LICENSE para detalles
 
 ---
 
-**Autor**: Basado en el trabajo de Angristan  
+**Origen**: basado en el trabajo de angristan (y antes Nyr), con licencia MIT  
 **Última actualización**: Diciembre 2025

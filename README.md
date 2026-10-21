@@ -14,7 +14,7 @@ reutilizables y sin datos sensibles.
 
 | Sección | Descripción |
 |---------|-------------|
-| `openvpn/` | Herramientas de gestión de OpenVPN: instalación, diagnóstico, backup, monitorización, rotación de IP pública, checklist de seguridad |
+| `openvpn/` | Herramientas de gestión de OpenVPN: instalación (derivada de angristan/openvpn-install, MIT), diagnóstico, backup, monitorización, certificados y checklist de seguridad |
 | `wireguard/` | VPN moderna con WireGuard: instalación segura del servidor y alta de peers (claves generadas en el host, PSK por peer) |
 | `backups/` | Copias de seguridad cifradas y verificadas con restic o BorgBackup (retención, integridad) |
 | `monitoring/` | Monitorización y alertas: `node_exporter` endurecido (Ansible) y detección de fuerza bruta en logs de auth |

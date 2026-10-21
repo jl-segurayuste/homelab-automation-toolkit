@@ -82,7 +82,8 @@ fi
 
 # 9. IPs bloqueadas
 if nft list set inet security blocklist &>/dev/null; then
-    BLOCKED=$(nft list set inet security blocklist | grep -c "elements" || echo "0")
+    BLOCKED=$(nft list set inet security blocklist | grep -c "elements" || true)
+    BLOCKED=${BLOCKED:-0}
     echo "[INFO] IPs bloqueadas en firewall: $BLOCKED"
 else
     echo "[INFO] Blocklist no configurada en nftables"
@@ -92,7 +93,8 @@ BANNED=$(fail2ban-client status sshd 2>/dev/null | grep "Currently banned" | awk
 echo "[INFO] IPs baneadas por Fail2Ban (SSH): ${BANNED:-0}"
 
 # 10. Clientes conectados
-CLIENTS=$(grep -c "^CLIENT_LIST" /var/log/openvpn/status.log 2>/dev/null || echo "0")
+CLIENTS=$(grep -c "^CLIENT_LIST" /var/log/openvpn/status.log 2>/dev/null || true)
+CLIENTS=${CLIENTS:-0}
 echo "[INFO] Clientes VPN conectados: $CLIENTS"
 
 # 11. Última actualización del sistema

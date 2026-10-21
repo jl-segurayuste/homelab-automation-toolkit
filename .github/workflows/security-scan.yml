@@ -43,4 +43,4 @@ jobs:
         run: |
           set -e
           find . -name '*.sh' -not -path './.git/*' -print0 \
-            | xargs -0 -r shellcheck --severity=warning || true
+            | xargs -0 -r shellcheck --severity=warning

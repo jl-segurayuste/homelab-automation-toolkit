@@ -100,13 +100,15 @@ fi
 echo ""
 
 echo "Clientes válidos:"
-num_valid=$(tail -n +2 pki/index.txt 2>/dev/null | grep -c "^V" || echo "0")
+num_valid=$(tail -n +2 pki/index.txt 2>/dev/null | grep -c "^V" || true)
+num_valid=${num_valid:-0}
 echo "Total: $num_valid"
 tail -n +2 pki/index.txt 2>/dev/null | grep "^V" | cut -d '=' -f 2 | nl
 echo ""
 
 echo "Clientes revocados:"
-num_revoked=$(tail -n +2 pki/index.txt 2>/dev/null | grep -c "^R" || echo "0")
+num_revoked=$(tail -n +2 pki/index.txt 2>/dev/null | grep -c "^R" || true)
+num_revoked=${num_revoked:-0}
 echo "Total: $num_revoked"
 if [[ $num_revoked -gt 0 ]]; then
     tail -n +2 pki/index.txt | grep "^R" | cut -d '=' -f 2 | nl

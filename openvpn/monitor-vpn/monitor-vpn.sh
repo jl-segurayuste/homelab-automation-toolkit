@@ -63,7 +63,8 @@ else
 fi
 
 # Contar clientes conectados
-CLIENTS=$(grep -c "^CLIENT_LIST" /var/log/openvpn/status.log 2>/dev/null || echo "0")
+CLIENTS=$(grep -c "^CLIENT_LIST" /var/log/openvpn/status.log 2>/dev/null || true)
+CLIENTS=${CLIENTS:-0}
 log "Clientes conectados: $CLIENTS"
 
 # Verificar IP forwarding
@@ -93,5 +94,6 @@ if [[ $DISK_USAGE -gt 80 ]]; then
 fi
 
 # Verificar IPs bloqueadas en nftables
-BLOCKED_COUNT=$(nft list set inet security blocklist 2>/dev/null | grep -c "elements" || echo "0")
+BLOCKED_COUNT=$(nft list set inet security blocklist 2>/dev/null | grep -c "elements" || true)
+BLOCKED_COUNT=${BLOCKED_COUNT:-0}
 log "IPs bloqueadas en firewall: $BLOCKED_COUNT"
