@@ -48,7 +48,7 @@ du -sh /etc/openvpn/ /etc/iptables/ /etc/ufw/ /etc/fail2ban/ 2>/dev/null | awk '
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/backup-vpn.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/backup-vpn/backup-vpn.sh
 
 # Dar permisos de ejecución
 chmod +x backup-vpn.sh
@@ -382,8 +382,8 @@ scp /backup/vpn/vpn_backup_20241208_143015.tar.gz user@nuevo-servidor:/tmp/
 
 # En servidor nuevo:
 # 1. Instalar OpenVPN (sin configurar)
-wget https://raw.githubusercontent.com/tu-repo/openvpn-install.sh
-chmod +x openvpn-install.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/openvpn-debian-installer/openvpn-debian-installer.sh
+chmod +x openvpn-debian-installer.sh
 # NO ejecutar el instalador, solo instalar paquetes necesarios:
 sudo apt update
 sudo apt install -y openvpn iptables
@@ -841,7 +841,7 @@ tar -cJf "$BACKUP_FILE" /etc/openvpn/
 
 ## Licencia
 
-GPL-3.0
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Autor
 
@@ -850,10 +850,10 @@ GPL-3.0
 
 ## Scripts Relacionados
 
-- [openvpn-install.sh](README.md) - Instalación de OpenVPN
-- [openvpn-diagnostics.sh](README-diagnostics.md) - Diagnóstico completo
-- [monitor-vpn.sh](README-monitor.md) - Monitoreo continuo
-- [check-vpn-certs.sh](README-cert-checker.md) - Verificación de certificados
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Instalación de OpenVPN
+- [openvpn-diagnostics.sh](../openvpn-diagnostics/README.md) - Diagnóstico completo
+- [monitor-vpn.sh](../monitor-vpn/README.md) - Monitoreo continuo
+- [check-vpn-certs.sh](../check-vpn-certs/README.md) - Verificación de certificados
 
 ---
 

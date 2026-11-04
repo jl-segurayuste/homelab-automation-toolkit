@@ -42,7 +42,7 @@ fail2ban      # Opcional - para estadísticas de baneos
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/analyze-vpn-logs.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/analyze-vpn-logs/analyze-vpn-logs.sh
 
 # Dar permisos de ejecución
 chmod +x analyze-vpn-logs.sh
@@ -783,7 +783,7 @@ if $programname == 'openvpn' then @@siem-server.ejemplo.com:514
 
 ## Licencia
 
-GPL-3.0
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Autor
 
@@ -792,11 +792,11 @@ GPL-3.0
 
 ## Scripts Relacionados
 
-- [openvpn-install.sh](README.md) - Instalación de OpenVPN
-- [openvpn-diagnostics.sh](README-diagnostics.md) - Diagnóstico completo
-- [monitor-vpn.sh](README-monitor.md) - Monitoreo continuo
-- [check-vpn-certs.sh](README-cert-checker.md) - Verificación de certificados
-- [backup-vpn.sh](README-backup.md) - Backup y restauración
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Instalación de OpenVPN
+- [openvpn-diagnostics.sh](../openvpn-diagnostics/README.md) - Diagnóstico completo
+- [monitor-vpn.sh](../monitor-vpn/README.md) - Monitoreo continuo
+- [check-vpn-certs.sh](../check-vpn-certs/README.md) - Verificación de certificados
+- [backup-vpn.sh](../backup-vpn/README.md) - Backup y restauración
 
 ---
 

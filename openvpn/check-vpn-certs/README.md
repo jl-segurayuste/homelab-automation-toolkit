@@ -12,7 +12,8 @@ Este script revisa todos los certificados emitidos en la PKI de OpenVPN y report
 - 📅 Cálculo preciso de días restantes hasta expiración
 - 🚨 Alertas configurables para certificados próximos a vencer
 - 🔴 Detección de certificados ya expirados
-- 📊 Reporte claro con códigos de color
+- 📊 Reporte con colores en terminal y resumen final
+- 🚦 Código de salida útil para cron/monitorización (0 bien, 1 avisos, 2 no se pudo revisar)
 - 🔧 Sin modificaciones al sistema (solo lectura)
 
 ## Requisitos
@@ -42,7 +43,7 @@ El script asume la estructura estándar de Easy-RSA:
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/check-vpn-certs.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/check-vpn-certs/check-vpn-certs.sh
 
 # Dar permisos de ejecución
 chmod +x check-vpn-certs.sh
@@ -60,16 +61,9 @@ sudo mv check-vpn-certs.sh /usr/local/bin/
 sudo ./check-vpn-certs.sh
 ```
 
-**Salida de ejemplo:**
-```
-Verificando certificados OpenVPN...
+**Salida de ejemplo** (PKI de prueba con datos ficticios):
 
-[OK] server_abc123 - Expira en 3560 días
-[OK] cliente1 - Expira en 3548 días
-[AVISO] laptop-trabajo - Expira en 25 días (Jan 2 14:30:00 2025 GMT)
-[OK] movil-android - Expira en 180 días
-[EXPIRADO] viejo-cliente - Expiró hace 15 días
-```
+![Salida de check-vpn-certs.sh](../../docs/img/check-vpn-certs.svg)
 
 ### Guardar Reporte
 
@@ -98,29 +92,25 @@ sudo ./check-vpn-certs.sh | grep -c '\[EXPIRADO\]'
 
 ## Configuración
 
-### Personalizar Umbral de Advertencia
+Sin editar el script, con variables de entorno:
 
-Por defecto, el script alerta cuando quedan menos de 30 días. Para cambiar esto:
-
-```bash
-# Editar el script
-nano check-vpn-certs.sh
-
-# Modificar la línea (ejemplo: 60 días)
-WARN_DAYS=60
-```
-
-### Personalizar Directorio de Certificados
-
-Si tu instalación de OpenVPN usa una ruta diferente:
+| Variable | Por defecto | Para qué |
+|---|---|---|
+| `WARN_DAYS` | `30` | Días de antelación para el aviso |
+| `CERT_DIR` | `/etc/openvpn/easy-rsa/pki/issued` | Carpeta de certificados (la del instalador del toolkit) |
 
 ```bash
-# Editar el script
-nano check-vpn-certs.sh
-
-# Modificar la línea
-CERT_DIR="/ruta/personalizada/pki/issued"
+sudo WARN_DAYS=60 ./check-vpn-certs.sh
+sudo CERT_DIR=/etc/openvpn/server/easy-rsa/pki/issued ./check-vpn-certs.sh
 ```
+
+### Código de salida
+
+| Código | Significado |
+|---|---|
+| `0` | Todos los certificados están en vigor |
+| `1` | Hay alguno caducado, a punto de caducar o ilegible |
+| `2` | No se pudo revisar: la carpeta no existe o no tiene ningún `.crt` |
 
 ## Interpretación de Resultados
 
@@ -225,8 +215,8 @@ sudo crontab -e
 
 OUTPUT=$(sudo /usr/local/bin/check-vpn-certs.sh)
 
-# Verificar si hay certificados con problemas
-if echo "$OUTPUT" | grep -qE '\[AVISO\]|\[EXPIRADO\]'; then
+# Código distinto de 0: hay certificados con problemas o no se pudo revisar
+if [[ $? -ne 0 ]]; then
     # Enviar email con el reporte completo
     echo "$OUTPUT" | mail -s "⚠️ Alerta: Certificados OpenVPN próximos a vencer" admin@ejemplo.com
 fi
@@ -508,7 +498,7 @@ ls -la /etc/openvpn/easy-rsa/pki/issued/
 # Si no existe, verificar ruta de instalación
 find /etc/openvpn -name "issued" -type d
 
-# Ajustar CERT_DIR en el script
+# Indicar la ruta: CERT_DIR=/ruta/pki/issued ./check-vpn-certs.sh
 ```
 
 ### Fechas Incorrectas
@@ -535,12 +525,12 @@ sudo ./check-vpn-certs.sh
 
 ## Scripts Relacionados
 
-- [openvpn-install.sh](README.md) - Instalación de OpenVPN
-- [openvpn-diagnostics.sh](README-diagnostics.md) - Diagnóstico completo del servidor
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Instalación de OpenVPN
+- [openvpn-diagnostics.sh](../openvpn-diagnostics/README.md) - Diagnóstico completo del servidor
 
 ## Licencia
 
-GPL-3.0
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Autor
 

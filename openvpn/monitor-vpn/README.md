@@ -828,7 +828,7 @@ find /var/log -name "vpn-monitor.log*" -mtime +30 -delete
 
 ## Licencia
 
-GPL-3.0
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Autor
 
@@ -837,9 +837,9 @@ GPL-3.0
 
 ## Scripts Relacionados
 
-- [openvpn-install.sh](README.md) - Instalación de OpenVPN
-- [openvpn-diagnostics.sh](README-diagnostics.md) - Diagnóstico completo
-- [check-vpn-certs.sh](README-cert-checker.md) - Verificación de certificados
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Instalación de OpenVPN
+- [openvpn-diagnostics.sh](../openvpn-diagnostics/README.md) - Diagnóstico completo
+- [check-vpn-certs.sh](../check-vpn-certs/README.md) - Verificación de certificados
 
 ---
 

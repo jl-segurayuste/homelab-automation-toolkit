@@ -10,6 +10,18 @@ reutilizables y sin datos sensibles.
 > nombres de empresas ni inventarios reales. Los valores específicos se sustituyen
 > por plantillas (`.env.example`, placeholders `<TU_VALOR>`).
 
+## Así se ve
+
+Dos ejemplos ejecutados de verdad con datos de prueba (una PKI de OpenVPN generada para la demo
+y un módulo de Active Directory simulado):
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/check-vpn-certs.svg" alt="Caducidad de certificados de OpenVPN"><br><sub><a href="openvpn/check-vpn-certs/"><code>openvpn/check-vpn-certs</code></a>: caducidad de los certificados de la PKI</sub></td>
+<td width="50%"><img src="docs/img/ad-powershell-pruebas.svg" alt="Pruebas de los scripts de Active Directory"><br><sub><a href="ad-powershell/"><code>ad-powershell</code></a>: pruebas sin Windows ni dominio</sub></td>
+</tr>
+</table>
+
 ## Contenido
 
 | Sección | Descripción |

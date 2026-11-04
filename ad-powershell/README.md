@@ -108,6 +108,8 @@ pwsh -NoProfile -c 'Install-Module PSScriptAnalyzer -Scope CurrentUser -Force;
   Invoke-ScriptAnalyzer -Path ad-powershell -Recurse -Severity Error,ParseError'
 ```
 
+![Pruebas con el módulo ActiveDirectory simulado](../docs/img/ad-powershell-pruebas.svg)
+
 > Nota: los módulos de `library/` necesitan `Ansible.Basic`, así que el CI solo comprueba su
 > sintaxis y su análisis estático; su comportamiento hay que probarlo contra un Windows real.
 

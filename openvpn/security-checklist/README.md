@@ -49,7 +49,7 @@ grep, awk     # Procesamiento de texto (coreutils)
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/security-checklist.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/security-checklist/security-checklist.sh
 
 # Dar permisos de ejecución
 chmod +x security-checklist.sh
@@ -920,7 +920,7 @@ sudo /usr/local/bin/security-checklist.sh
 
 ## Licencia
 
-GPL-3.0
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Autor
 
@@ -929,12 +929,12 @@ GPL-3.0
 
 ## Scripts Relacionados
 
-- [openvpn-install.sh](README.md) - Instalación de OpenVPN
-- [openvpn-diagnostics.sh](README-diagnostics.md) - Diagnóstico completo
-- [monitor-vpn.sh](README-monitor.md) - Monitoreo continuo
-- [check-vpn-certs.sh](README-cert-checker.md) - Verificación de certificados
-- [backup-vpn.sh](README-backup.md) - Backup y restauración
-- [analyze-vpn-logs.sh](README-log-analysis.md) - Análisis de logs
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Instalación de OpenVPN
+- [openvpn-diagnostics.sh](../openvpn-diagnostics/README.md) - Diagnóstico completo
+- [monitor-vpn.sh](../monitor-vpn/README.md) - Monitoreo continuo
+- [check-vpn-certs.sh](../check-vpn-certs/README.md) - Verificación de certificados
+- [backup-vpn.sh](../backup-vpn/README.md) - Backup y restauración
+- [analyze-vpn-logs.sh](../analyze-vpn-logs/README.md) - Análisis de logs
 
 ---
 

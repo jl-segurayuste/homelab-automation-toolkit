@@ -46,7 +46,7 @@ cat, grep    # Utilidades básicas
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/openvpn-diagnostics.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/openvpn-diagnostics/openvpn-diagnostics.sh
 
 # Dar permisos de ejecución
 chmod +x openvpn-diagnostics.sh
@@ -55,8 +55,8 @@ chmod +x openvpn-diagnostics.sh
 ### Desde Repositorio
 
 ```bash
-git clone https://github.com/tu-repo/openvpn-tools.git
-cd openvpn-tools
+git clone https://github.com/jl-segurayuste/homelab-automation-toolkit.git
+cd homelab-automation-toolkit/openvpn/openvpn-diagnostics
 chmod +x openvpn-diagnostics.sh
 ```
 
@@ -548,7 +548,7 @@ sudo journalctl -u openvpn@server -f
 
 ## Licencia
 
-GPL-3.0 - Ver archivo LICENSE para detalles
+MIT — ver [LICENSE](../../LICENSE) en la raíz del repositorio.
 
 ## Contribución
 
@@ -562,7 +562,7 @@ Reporta bugs o sugerencias a través de Issues en GitHub.
 
 ## Ver También
 
-- [openvpn-install.sh](README.md) - Script de instalación de OpenVPN
+- [openvpn-debian-installer.sh](../openvpn-debian-installer/README.md) - Script de instalación de OpenVPN
 - [Documentación oficial OpenVPN](https://openvpn.net/community-resources/)
 - [OpenVPN Troubleshooting Guide](https://community.openvpn.net/openvpn/wiki/TroubleshootingGuide)
 
