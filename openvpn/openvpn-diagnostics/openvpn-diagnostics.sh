@@ -11,13 +11,19 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+ERRORS=0
+error() {
+    echo -e "[${RED}ERROR${NC}] $1"
+    ERRORS=$((ERRORS + 1))
+}
+
 # 1. Estado del servicio
 echo "1. ESTADO DEL SERVICIO"
 echo "----------------------"
 if systemctl is-active --quiet openvpn@server; then
     echo -e "[${GREEN}OK${NC}] Servicio OpenVPN está activo"
 else
-    echo -e "[${RED}ERROR${NC}] Servicio OpenVPN NO está activo"
+    error "Servicio OpenVPN NO está activo"
     echo ""
     echo "Iniciando servicio..."
     sudo systemctl start openvpn@server
@@ -35,7 +41,7 @@ if ss -tulpn | grep -q openvpn; then
     echo -e "[${GREEN}OK${NC}] OpenVPN está escuchando:"
     ss -tulpn | grep openvpn
 else
-    echo -e "[${RED}ERROR${NC}] OpenVPN NO está escuchando en ningún puerto"
+    error "OpenVPN NO está escuchando en ningún puerto"
 fi
 echo ""
 
@@ -46,7 +52,7 @@ if ip addr show tun0 &>/dev/null; then
     echo -e "[${GREEN}OK${NC}] Interfaz tun0 existe:"
     ip addr show tun0
 else
-    echo -e "[${RED}ERROR${NC}] Interfaz tun0 NO existe"
+    error "Interfaz tun0 NO existe"
 fi
 echo ""
 
@@ -70,7 +76,7 @@ ipv4_forward=$(cat /proc/sys/net/ipv4/ip_forward)
 if [[ $ipv4_forward == "1" ]]; then
     echo -e "[${GREEN}OK${NC}] IPv4 forwarding habilitado"
 else
-    echo -e "[${RED}ERROR${NC}] IPv4 forwarding deshabilitado"
+    error "IPv4 forwarding deshabilitado"
 fi
 echo ""
 
@@ -86,7 +92,7 @@ if [[ -f "pki/issued/${SERVER_NAME}.crt" ]]; then
     echo -e "[${GREEN}OK${NC}] Certificado del servidor existe"
     openssl x509 -in "pki/issued/${SERVER_NAME}.crt" -noout -subject -dates
 else
-    echo -e "[${RED}ERROR${NC}] Certificado del servidor NO encontrado"
+    error "Certificado del servidor NO encontrado"
 fi
 echo ""
 
@@ -95,7 +101,7 @@ if [[ -f "/etc/openvpn/ca.crt" ]]; then
     echo -e "[${GREEN}OK${NC}] CA existe"
     openssl x509 -in /etc/openvpn/ca.crt -noout -subject -dates
 else
-    echo -e "[${RED}ERROR${NC}] CA NO encontrada"
+    error "CA NO encontrada"
 fi
 echo ""
 
@@ -123,7 +129,7 @@ if [[ -f "/etc/openvpn/crl.pem" ]]; then
     crl_info=$(openssl crl -in /etc/openvpn/crl.pem -noout -nextupdate 2>/dev/null)
     echo "$crl_info"
 else
-    echo -e "[${RED}ERROR${NC}] CRL NO encontrada"
+    error "CRL NO encontrada"
 fi
 echo ""
 
@@ -140,7 +146,7 @@ if [[ -f "/etc/openvpn/server.conf" ]]; then
     echo "DNS:"
     grep "push.*DNS" /etc/openvpn/server.conf
 else
-    echo -e "[${RED}ERROR${NC}] server.conf NO encontrado"
+    error "server.conf NO encontrado"
 fi
 echo ""
 
@@ -164,3 +170,8 @@ echo ""
 echo "============================================="
 echo "Diagnóstico completado"
 echo "============================================="
+
+if [[ $ERRORS -gt 0 ]]; then
+    echo "$ERRORS error(es) encontrado(s)"
+    exit 1
+fi

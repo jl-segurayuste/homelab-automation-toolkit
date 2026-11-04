@@ -54,7 +54,7 @@ sudo apt install -y postfix
 
 ```bash
 # Descargar el script
-wget https://raw.githubusercontent.com/tu-repo/monitor-vpn.sh
+wget https://raw.githubusercontent.com/jl-segurayuste/homelab-automation-toolkit/main/openvpn/monitor-vpn/monitor-vpn.sh
 
 # Dar permisos de ejecución
 chmod +x monitor-vpn.sh
@@ -76,6 +76,13 @@ sudo nano /usr/local/bin/monitor-vpn.sh
 # Modificar esta línea con tu email real:
 ALERT_EMAIL="tu_email@ejemplo.com"
 ```
+
+También se puede configurar sin editar el script, con variables de entorno (por ejemplo en el
+crontab): `ALERT_EMAIL`, `LOG_FILE`, `SERVICE_NAME`, `TUN_INTERFACE`, `VPN_PORT`, `STATUS_LOG`,
+`CPU_THRESHOLD`, `MEM_THRESHOLD` y `DISK_THRESHOLD`.
+
+El script sale con código **1** si hay alguna ALERTA (y envía un único correo con todas, si `mail`
+está instalado), y con **0** si todo está bien. Los AVISO de CPU, memoria y disco no cambian el código.
 
 ## Configuración
 

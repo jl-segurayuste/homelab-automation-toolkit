@@ -1,6 +1,12 @@
 #!/bin/bash
 # security-checklist.sh - Versión nftables
 
+FAILS=0
+fail() {
+    echo "$1"
+    FAILS=$((FAILS + 1))
+}
+
 echo "=== CHECKLIST DE SEGURIDAD VPN ==="
 echo ""
 
@@ -8,7 +14,7 @@ echo ""
 if systemctl is-active --quiet openvpn@server; then
     echo "[OK] OpenVPN está corriendo"
 else
-    echo "[FALLO] OpenVPN NO está corriendo"
+    fail "[FALLO] OpenVPN NO está corriendo"
 fi
 
 # 2. nftables activo
@@ -18,17 +24,17 @@ if systemctl is-active --quiet nftables; then
     if [[ $RULES_COUNT -gt 0 ]]; then
         echo "[OK] nftables tiene reglas cargadas ($RULES_COUNT chains)"
     else
-        echo "[FALLO] nftables NO tiene reglas cargadas"
+        fail "[FALLO] nftables NO tiene reglas cargadas"
     fi
 else
-    echo "[FALLO] nftables NO está activo"
+    fail "[FALLO] nftables NO está activo"
 fi
 
 # 3. Tabla NAT configurada
 if nft list table ip nat &>/dev/null; then
     echo "[OK] Tabla NAT configurada"
 else
-    echo "[FALLO] Tabla NAT NO configurada"
+    fail "[FALLO] Tabla NAT NO configurada"
 fi
 
 # 4. IP Forwarding habilitado
@@ -36,14 +42,14 @@ IP_FORWARD=$(cat /proc/sys/net/ipv4/ip_forward)
 if [[ $IP_FORWARD -eq 1 ]]; then
     echo "[OK] IP forwarding habilitado"
 else
-    echo "[FALLO] IP forwarding deshabilitado"
+    fail "[FALLO] IP forwarding deshabilitado"
 fi
 
 # 5. Fail2Ban activo
 if systemctl is-active --quiet fail2ban; then
     echo "[OK] Fail2Ban está corriendo"
 else
-    echo "[FALLO] Fail2Ban NO está corriendo"
+    fail "[FALLO] Fail2Ban NO está corriendo"
 fi
 
 # 6. Actualizaciones pendientes
@@ -77,7 +83,7 @@ if [[ -f "$CA_CERT" ]]; then
         echo "[AVISO] CA expira en $DAYS_LEFT días ($EXPIRY_DATE)"
     fi
 else
-    echo "[ERROR] Certificado CA no encontrado"
+    fail "[ERROR] Certificado CA no encontrado"
 fi
 
 # 9. IPs bloqueadas
@@ -117,7 +123,7 @@ echo "[INFO] Uptime: $UPTIME"
 if ss -ulpn | grep -q ":1194"; then
     echo "[OK] Puerto 1194/UDP escuchando"
 else
-    echo "[FALLO] Puerto 1194/UDP NO escucha"
+    fail "[FALLO] Puerto 1194/UDP NO escucha"
 fi
 
 # 15. SSH seguro (opcional)
@@ -144,3 +150,6 @@ echo ""
 echo "Para monitorear:"
 echo "  sudo journalctl -u openvpn@server -f"
 echo "  sudo nft monitor"
+
+# Sale con 1 si algún punto ha fallado (los [AVISO] no cuentan).
+[[ $FAILS -eq 0 ]] || exit 1
