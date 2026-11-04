@@ -18,20 +18,24 @@ jobs:
   secret-scan:
     name: Escaneo de secretos (gitleaks)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read  # gitleaks v3 lee los commits del PR
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 
   repo-scan:
     name: Reglas del repo (secretos / iconos / nombres)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: scan-repo.sh
         run: bash scripts/security/scan-repo.sh
 
@@ -39,7 +43,7 @@ jobs:
     name: Lint de shell
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Instalar shellcheck
         run: sudo apt-get update -q && sudo apt-get install -y shellcheck
       - name: Ejecutar shellcheck
