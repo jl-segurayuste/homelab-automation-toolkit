@@ -15,7 +15,7 @@ es `rsync`/`tar` local, snapshots LVM e imágenes de VMs.
 | `backup_master.sh` | Orquesta el resto, cuenta errores y envía un reporte por email (msmtp). Planifica: diario `/etc` + `/home` + configs; domingos paquetes + snapshot LVM; día 1 de mes VMs completas, resto incrementales |
 | `backup_etc.sh` | Copia comprimida de `/etc` |
 | `backup_home.sh` | Backup incremental de `/home` con `rsync --link-dest` y rotación |
-| `backup_configs.sh` | Configuraciones de usuario (dotfiles, configs varias) |
+| `backup_configs.sh` | Configuraciones de usuario (dotfiles, `~/.ssh`, claves GPG), cifradas con GPG simétrico (ver abajo) |
 | `backup_packages.sh` | Inventario de paquetes instalados y orígenes APT |
 | `backup_lvm_snapshot.sh` | Snapshot LVM de la raíz (solo lectura) para copias consistentes |
 | `backup_vms_full.sh` | Backup completo de VMs |
@@ -37,6 +37,22 @@ bash backup_master.sh
 # 4) Programa en cron (ejemplo: a las 02:00)
 # 0 2 * * *  /mnt/backup_local/scripts/backup_master.sh
 ```
+
+Cada script sale con **código 1 si algo falla** y `backup_master.sh` también, si hubo algún error:
+así lo ven cron, systemd o la monitorización, además del correo.
+
+### Frase de paso de `backup_configs.sh`
+
+La copia lleva claves privadas y se cifra sin intervención (desde cron no hay quien teclee):
+
+```bash
+sudo install -m 600 /dev/null /root/.backup_gpg_pass
+sudo sh -c 'cat > /root/.backup_gpg_pass'     # escribe la frase de paso y pulsa Ctrl+D
+# otra ruta: BACKUP_GPG_PASSFILE=/ruta/al/fichero
+```
+
+Guárdala también fuera del equipo (gestor de contraseñas): sin ella la copia no se puede descifrar.
+Si falta el fichero, el script falla y no deja nada sin cifrar.
 
 ## Requisitos
 

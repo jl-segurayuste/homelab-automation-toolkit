@@ -110,3 +110,6 @@ EOF
 else
     echo "$(date): [!]  comando 'msmtp' no disponible" | tee -a ${LOG}
 fi
+
+# Código de salida != 0 si algo falló, para que cron/systemd/monitorización lo vean.
+[ "${ERRORS}" -eq 0 ] || exit 1

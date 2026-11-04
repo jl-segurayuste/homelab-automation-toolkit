@@ -31,4 +31,5 @@ if [ $? -eq 0 ]; then
         | sort -r | tail -n +8 | xargs -r rm -rf --
 else
     echo "$(date): [X] ERROR en backup incremental" | tee -a ${LOG}
+    exit 1   # backup_master.sh cuenta el error por el código de salida
 fi
