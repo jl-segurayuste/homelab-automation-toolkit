@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -Modules ActiveDirectory
 
 # =============================================================================
@@ -215,7 +215,7 @@ function New-ADUserWithPosix {
         # =====================================================================
         $uidConflict = Get-ADUser -Filter "uidNumber -eq $UID" `
                                    -Properties uidNumber,SamAccountName `
-                                   -ErrorAction SilentlyContinue
+                                   -ErrorAction Stop
 
         if ($uidConflict) {
             return @{
@@ -234,9 +234,9 @@ function New-ADUserWithPosix {
 
         if ($SkipGroupCreation) {
             # PAM: el grupo debe existir previamente
-            $existingGroup = Get-ADGroup -Filter "SamAccountName -eq '$groupToCheck'" `
+            $existingGroup = Get-ADGroup -Filter "SamAccountName -eq '$($groupToCheck -replace "'", "''")'" `
                                           -Properties gidNumber `
-                                          -ErrorAction SilentlyContinue
+                                          -ErrorAction Stop
             if (-not $existingGroup) {
                 return @{
                     success    = $false
@@ -260,7 +260,7 @@ function New-ADUserWithPosix {
             # No PAM: verificar que el GID no esté en uso por un grupo diferente
             $gidConflict = Get-ADGroup -Filter "gidNumber -eq $GID" `
                                         -Properties gidNumber,SamAccountName `
-                                        -ErrorAction SilentlyContinue
+                                        -ErrorAction Stop
 
             if ($gidConflict -and $gidConflict.SamAccountName -ne $groupToCheck) {
                 return @{
@@ -285,7 +285,7 @@ function New-ADUserWithPosix {
             extensionAttribute10 = "SinKeytab"
         }
 
-        $domain = (Get-ADDomain).DNSRoot
+        $domain = (Get-ADDomain -ErrorAction Stop).DNSRoot
         $upn    = "$UserName@$domain"
 
         $params = @{
@@ -304,7 +304,7 @@ function New-ADUserWithPosix {
                              $params.ChangePasswordAtLogon = $ChangePasswordAtLogon }
 
         New-ADUser @params
-        Set-ADUser -Identity $UserName -Enabled $true
+        Set-ADUser -Identity $UserName -Enabled $true -ErrorAction Stop
 
         return @{
             success  = $true
@@ -405,7 +405,7 @@ function Update-ADUserPosixAttributesSafe {
 
         # uidNumber
         if (!$user.uidNumber) {
-            Set-ADUser -Identity $UserName -Replace @{uidNumber = $UID}
+            Set-ADUser -Identity $UserName -Replace @{uidNumber = $UID} -ErrorAction Stop
             $changes += "uidNumber sin contenido -> agregado: $UID"
         }
         elseif ($user.uidNumber -ne $UID) {
@@ -414,7 +414,7 @@ function Update-ADUserPosixAttributesSafe {
 
         # gidNumber
         if (!$user.gidNumber) {
-            Set-ADUser -Identity $UserName -Replace @{gidNumber = $GID}
+            Set-ADUser -Identity $UserName -Replace @{gidNumber = $GID} -ErrorAction Stop
             $changes += "gidNumber sin contenido -> agregado: $GID"
         }
         elseif ($user.gidNumber -ne $GID) {
@@ -423,7 +423,7 @@ function Update-ADUserPosixAttributesSafe {
 
         # unixHomeDirectory
         if (!$user.unixHomeDirectory) {
-            Set-ADUser -Identity $UserName -Replace @{unixHomeDirectory = $UnixHomeDirectory}
+            Set-ADUser -Identity $UserName -Replace @{unixHomeDirectory = $UnixHomeDirectory} -ErrorAction Stop
             $changes += "unixHomeDirectory sin contenido -> agregado: $UnixHomeDirectory"
         }
         elseif ($user.unixHomeDirectory -ne $UnixHomeDirectory) {
@@ -432,7 +432,7 @@ function Update-ADUserPosixAttributesSafe {
 
         # loginShell
         if (!$user.loginShell) {
-            Set-ADUser -Identity $UserName -Replace @{loginShell = $LoginShell}
+            Set-ADUser -Identity $UserName -Replace @{loginShell = $LoginShell} -ErrorAction Stop
             $changes += "loginShell sin contenido -> agregado: $LoginShell"
         }
         elseif ($user.loginShell -ne $LoginShell) {
@@ -441,7 +441,7 @@ function Update-ADUserPosixAttributesSafe {
 
         # gecos
         if (!$user.gecos) {
-            Set-ADUser -Identity $UserName -Replace @{gecos = $Gecos}
+            Set-ADUser -Identity $UserName -Replace @{gecos = $Gecos} -ErrorAction Stop
             $changes += "gecos sin contenido -> agregado: $Gecos"
         }
         elseif ($user.gecos -ne $Gecos) {
@@ -451,7 +451,7 @@ function Update-ADUserPosixAttributesSafe {
         # description
         if ($Description) {
             if (!$user.description) {
-                Set-ADUser -Identity $UserName -Replace @{description = $Description}
+                Set-ADUser -Identity $UserName -Replace @{description = $Description} -ErrorAction Stop
                 $changes += "description sin contenido -> agregado: $Description"
             }
             elseif ($user.description -ne $Description) {
@@ -608,21 +608,24 @@ function Add-ADUserToGroups {
     try {
         $addedGroups = @()
         $errors      = @()
-
+        # La pertenencia se mira en el memberOf del usuario: antes se reconocía por el texto
+        # "already a member" del error, que en un controlador de dominio en español no sale y el
+        # usuario que ya era miembro se contaba como error.
+        $memberOf = @((Get-ADUser -Identity $UserName -Properties memberOf -ErrorAction Stop).memberOf)
         foreach ($group in $Groups) {
             try {
-                Add-ADGroupMember -Identity $group `
+                $g = Get-ADGroup -Identity $group -ErrorAction Stop
+                if ($memberOf -contains $g.DistinguishedName) {
+                    $addedGroups += "$group (ya miembro)"
+                    continue
+                }
+                Add-ADGroupMember -Identity $g `
                                   -Members $UserName `
                                   -ErrorAction Stop
                 $addedGroups += $group
             }
-            catch [Microsoft.ActiveDirectory.Management.ADException] {
-                if ($_.Exception.Message -like "*already a member*") {
-                    $addedGroups += "$group (ya miembro)"
-                }
-                else {
-                    $errors += "Grupo $group : $($_.Exception.Message)"
-                }
+            catch {
+                $errors += "Grupo $group : $($_.Exception.Message)"
             }
         }
 
@@ -671,7 +674,9 @@ function Remove-ADUserSafe {
     )
 
     try {
-        Get-ADUser -Identity $UserName -ErrorAction Stop
+        # $null: sin él, el usuario encontrado salía también por el pipeline y la función devolvía
+        # un array [usuario, resultado] en vez del resultado.
+        $null = Get-ADUser -Identity $UserName -ErrorAction Stop
         Remove-ADUser -Identity $UserName -Confirm:$false -ErrorAction Stop
 
         return @{

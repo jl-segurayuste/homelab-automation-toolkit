@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -Modules ActiveDirectory
 
 # =============================================================================
@@ -157,14 +157,17 @@ function New-ADGroupWithGIDSafe {
     )
 
     try {
-        $existingGroup = Get-ADGroup -Filter "SamAccountName -eq '$GroupName'" `
+        # Consultas con -ErrorAction Stop: con SilentlyContinue, si el controlador de dominio fallaba,
+        # la comprobación del GID duplicado se saltaba y se creaba el grupo con un GID ya usado.
+        # Un -Filter sin resultados no es un error.
+        $existingGroup = Get-ADGroup -Filter "SamAccountName -eq '$($GroupName -replace "'", "''")'" `
                                      -Properties gidNumber `
-                                     -ErrorAction SilentlyContinue
+                                     -ErrorAction Stop
 
         if ($existingGroup) {
             if (!$existingGroup.gidNumber) {
                 # Grupo existe SIN gidNumber -> AÑADIR
-                Set-ADGroup -Identity $GroupName -Replace @{gidNumber = $GID}
+                Set-ADGroup -Identity $existingGroup -Replace @{gidNumber = $GID} -ErrorAction Stop
                 return @{
                     success = $true
                     action  = "updated"
@@ -197,7 +200,7 @@ function New-ADGroupWithGIDSafe {
             # El grupo NO EXISTE -> comprobar que el GID no esté en uso
             $gidConflict = Get-ADGroup -Filter "gidNumber -eq $GID" `
                                         -Properties gidNumber,SamAccountName `
-                                        -ErrorAction SilentlyContinue
+                                        -ErrorAction Stop
 
             if ($gidConflict) {
                 return @{
@@ -277,7 +280,9 @@ function Remove-ADGroupSafe {
     )
 
     try {
-        Get-ADGroup -Identity $GroupName -ErrorAction Stop
+        # $null: sin él, el grupo encontrado salía también por el pipeline y la función devolvía
+        # un array [grupo, resultado] en vez del resultado.
+        $null = Get-ADGroup -Identity $GroupName -ErrorAction Stop
         Remove-ADGroup -Identity $GroupName -Confirm:$false -ErrorAction Stop
 
         return @{

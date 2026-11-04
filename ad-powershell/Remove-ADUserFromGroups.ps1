@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 # Remove-ADUserFromGroups
 # Elimina un usuario de uno o varios grupos de AD.
 # Simétrica a Add-ADUserToGroups de ad_user_operations.ps1
@@ -34,18 +34,31 @@ function Remove-ADUserFromGroups {
     $groups_removed = @()
     $errors         = @()
 
+    # La pertenencia se mira en el memberOf del usuario. Antes se usaba Get-ADGroupMember con
+    # SilentlyContinue: si fallaba (grupos de más de 5000 miembros, miembros de otros dominios),
+    # el usuario parecía no ser miembro y la función decía que ya no lo era sin retirarlo.
+    try {
+        $memberOf = @((Get-ADUser -Identity $UserName -Properties memberOf -ErrorAction Stop).memberOf)
+    }
+    catch {
+        return @{
+            success        = $false
+            message        = "No se pudo leer el usuario '$UserName': $($_.Exception.Message)"
+            groups_removed = @()
+            errors         = @($_.Exception.Message)
+        }
+    }
+
     foreach ($group in $Groups) {
         try {
-            $g = Get-ADGroup -Filter "SamAccountName -eq '$group'" `
-                             -ErrorAction SilentlyContinue
+            $g = Get-ADGroup -Filter "SamAccountName -eq '$($group -replace "'", "''")'" `
+                             -ErrorAction Stop
             if (-not $g) {
                 $errors += "Grupo '$group' no existe en AD"
                 continue
             }
 
-            $isMember = Get-ADGroupMember -Identity $group `
-                                          -ErrorAction SilentlyContinue |
-                        Where-Object { $_.SamAccountName -eq $UserName }
+            $isMember = $memberOf -contains $g.DistinguishedName
 
             if (-not $isMember) {
                 $groups_removed += "$group (el usuario ya no era miembro)"

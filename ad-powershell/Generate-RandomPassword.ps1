@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 
 # =============================================================================
 # GENERACIÓN DE PASSWORDS ALEATORIAS PARA ACTIVE DIRECTORY
@@ -46,10 +46,29 @@
     Genera password de 12 caracteres que no contiene "asmith"
 .NOTES
     Author: homelab-automation-toolkit
-    Version: 1.1
+    Version: 1.2
+    Corrección 1.2: generador criptográfico en lugar de Get-Random.
     Corrección: uso de [regex]::Escape para evitar WildcardPatternException
     con contraseñas que contienen caracteres especiales como * [ ]
 #>
+function Get-SecureRandomIndex {
+    # Índice aleatorio en [0, Max) con el generador criptográfico: Get-Random usa System.Random,
+    # que no sirve para contraseñas. Se descartan los valores que no completan un múltiplo de Max
+    # para que todos los caracteres tengan la misma probabilidad.
+    param([int]$Max)
+    $rng   = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    $bytes = New-Object byte[] 4
+    $limit = [uint32]::MaxValue - ([uint32]::MaxValue % [uint32]$Max)
+    try {
+        do {
+            $rng.GetBytes($bytes)
+            $value = [BitConverter]::ToUInt32($bytes, 0)
+        } while ($value -ge $limit)
+    }
+    finally { $rng.Dispose() }
+    return [int]($value % [uint32]$Max)
+}
+
 function Generate-RandomPassword {
     [CmdletBinding()]
     param(
@@ -73,24 +92,24 @@ function Generate-RandomPassword {
         $uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         $lowercase = "abcdefghijklmnopqrstuvwxyz"
         $numbers   = "0123456789"
-        $specials  = "~!@#$%&*_-+=|()[]:;<>,."
+        $specials  = '~!@#$%&*_-+=|()[]:;<>,.'
 
         # Paso 1: Asegurar al menos un carácter de cada tipo (requisito de AD)
         $password  = @()
-        $password += $uppercase[(Get-Random -Maximum $uppercase.Length)]
-        $password += $lowercase[(Get-Random -Maximum $lowercase.Length)]
-        $password += $numbers[(Get-Random -Maximum $numbers.Length)]
-        $password += $specials[(Get-Random -Maximum $specials.Length)]
+        $password += $uppercase[(Get-SecureRandomIndex -Max $uppercase.Length)]
+        $password += $lowercase[(Get-SecureRandomIndex -Max $lowercase.Length)]
+        $password += $numbers[(Get-SecureRandomIndex -Max $numbers.Length)]
+        $password += $specials[(Get-SecureRandomIndex -Max $specials.Length)]
 
         # Paso 2: Rellenar el resto con caracteres aleatorios
         $allChars = $uppercase + $lowercase + $numbers + $specials
         for ($i = $password.Count; $i -lt $Length; $i++) {
-            $password += $allChars[(Get-Random -Maximum $allChars.Length)]
+            $password += $allChars[(Get-SecureRandomIndex -Max $allChars.Length)]
         }
 
         # Paso 3: Desordenar la password usando algoritmo Fisher-Yates
         for ($i = $password.Count - 1; $i -gt 0; $i--) {
-            $j        = Get-Random -Maximum ($i + 1)
+            $j        = Get-SecureRandomIndex -Max ($i + 1)
             $temp     = $password[$i]
             $password[$i] = $password[$j]
             $password[$j] = $temp

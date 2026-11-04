@@ -45,7 +45,7 @@ function Get-ExistingUser {
     param([string]$Identity)
     try {
         return Get-ADUser -Identity $Identity `
-            -Properties uidNumber, gidNumber, unixHomeDirectory, loginShell, gecos, description, memberOf `
+            -Properties uidNumber, gidNumber, unixHomeDirectory, loginShell, gecos, description, extensionAttribute10, memberOf `
             -ErrorAction Stop
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
@@ -53,24 +53,42 @@ function Get-ExistingUser {
     }
 }
 
+function Get-SecureRandomIndex {
+    # Indice aleatorio en [0, Max) con el generador criptografico: Get-Random usa System.Random,
+    # que no sirve para contrasenas. Se descartan los valores que no completan un multiplo de Max
+    # para que todos los caracteres tengan la misma probabilidad.
+    param([int]$Max)
+    $rng   = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    $bytes = New-Object byte[] 4
+    $limit = [uint32]::MaxValue - ([uint32]::MaxValue % [uint32]$Max)
+    try {
+        do {
+            $rng.GetBytes($bytes)
+            $value = [BitConverter]::ToUInt32($bytes, 0)
+        } while ($value -ge $limit)
+    }
+    finally { $rng.Dispose() }
+    return [int]($value % [uint32]$Max)
+}
+
 function New-CompliantPassword {
     param([int]$Length, [string]$Username)
     $upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     $lower   = "abcdefghijklmnopqrstuvwxyz"
     $nums    = "0123456789"
-    $special = "~!@#$%&*_-+=|()[]:;<>,."
+    $special = '~!@#$%&*_-+=|()[]:;<>,.'
     for ($attempt = 1; $attempt -le 50; $attempt++) {
         $chars = @()
-        $chars += $upper[(Get-Random -Maximum $upper.Length)]
-        $chars += $lower[(Get-Random -Maximum $lower.Length)]
-        $chars += $nums[(Get-Random -Maximum $nums.Length)]
-        $chars += $special[(Get-Random -Maximum $special.Length)]
+        $chars += $upper[(Get-SecureRandomIndex -Max $upper.Length)]
+        $chars += $lower[(Get-SecureRandomIndex -Max $lower.Length)]
+        $chars += $nums[(Get-SecureRandomIndex -Max $nums.Length)]
+        $chars += $special[(Get-SecureRandomIndex -Max $special.Length)]
         $all = $upper + $lower + $nums + $special
         for ($i = $chars.Count; $i -lt $Length; $i++) {
-            $chars += $all[(Get-Random -Maximum $all.Length)]
+            $chars += $all[(Get-SecureRandomIndex -Max $all.Length)]
         }
         for ($i = $chars.Count - 1; $i -gt 0; $i--) {
-            $j = Get-Random -Maximum ($i + 1)
+            $j = Get-SecureRandomIndex -Max ($i + 1)
             $t = $chars[$i]; $chars[$i] = $chars[$j]; $chars[$j] = $t
         }
         $candidate = -join $chars
@@ -109,7 +127,7 @@ $gid = $module.Params.gid_number
 
 if (-not $existing) {
     # Comprobar conflicto de UID con otro usuario.
-    $uidConflict = Get-ADUser -Filter "uidNumber -eq $uid" -Properties uidNumber, SamAccountName -ErrorAction SilentlyContinue
+    $uidConflict = Get-ADUser -Filter "uidNumber -eq $uid" -Properties uidNumber, SamAccountName -ErrorAction Stop
     if ($uidConflict) {
         $module.FailJson("El UID $uid ya esta en uso por el usuario $($uidConflict.SamAccountName)")
     }
@@ -119,7 +137,7 @@ if (-not $existing) {
     if (-not $plainPassword -and $module.Params.generate_password) {
         $plainPassword = New-CompliantPassword -Length $module.Params.password_length -Username $name
         $module.Result.generated_password = $plainPassword
-        $module.Result.warnings_detail += "Se genero una contrasena aleatoria (campo no_log)"
+        $module.Result.warnings_detail += "Se genero una contrasena aleatoria: va en generated_password, pon no_log: true en la tarea"
     }
 
     $posix = @{
@@ -133,7 +151,7 @@ if (-not $existing) {
         $posix.extensionAttribute10 = $module.Params.extension_attribute10
     }
 
-    $suffix = if ($module.Params.upn_suffix) { $module.Params.upn_suffix } else { (Get-ADDomain).DNSRoot }
+    $suffix = if ($module.Params.upn_suffix) { $module.Params.upn_suffix } else { (Get-ADDomain -ErrorAction Stop).DNSRoot }
     $params = @{
         Name                 = $name
         SamAccountName       = $name
@@ -182,7 +200,7 @@ else {
         elseif ("$current" -ne "$want") {
             if ($force) {
                 $replace[$attr] = $want
-                $changes += "$attr: $current -> $want"
+                $changes += "${attr}: $current -> $want"
             }
             else {
                 $module.Result.warnings_detail += "ADVERTENCIA: $attr actual '$current', solicitado '$want'. NO modificado (update_mode=safe)."
@@ -203,17 +221,18 @@ else {
 # -----------------------------------------------------------------------------
 # Membresia de grupos (idempotente).
 # -----------------------------------------------------------------------------
+# La pertenencia se mira en el memberOf del usuario: Get-ADGroupMember falla con grupos de mas de
+# 5000 miembros o con miembros de otros dominios, y antes ese fallo solo dejaba un aviso: el usuario
+# se quedaba sin el grupo y la tarea salia "ok".
 $groupsAdded = @()
+$memberOf = @()
+if ($module.Params.groups.Count -gt 0) {
+    $current = Get-ExistingUser -Identity $name
+    if ($current) { $memberOf = @($current.memberOf) }
+}
 foreach ($group in $module.Params.groups) {
-    $member = $null
-    try {
-        $member = Get-ADGroupMember -Identity $group -ErrorAction Stop | Where-Object { $_.SamAccountName -eq $name }
-    }
-    catch {
-        $module.Result.warnings_detail += "No se pudo comprobar el grupo ${group}: $($_.Exception.Message)"
-        continue
-    }
-    if (-not $member) {
+    $g = Get-ADGroup -Identity $group -ErrorAction Stop
+    if ($memberOf -notcontains $g.DistinguishedName) {
         if (-not $module.CheckMode) {
             Add-ADGroupMember -Identity $group -Members $name -ErrorAction Stop
         }

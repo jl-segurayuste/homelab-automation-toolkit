@@ -21,6 +21,9 @@ $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $userName = $module.Params.username
 $module.Result.changed = $false
 
+# Las consultas van con -ErrorAction Stop: con SilentlyContinue, si el controlador de dominio no
+# respondia, el primer candidato parecia libre aunque existiera.
+
 # Detectar sufijo numerico de 2 digitos al final.
 $numericMatch = [regex]::Match($userName, '^(.+?)(\d{2})$')
 if ($numericMatch.Success) {
@@ -36,7 +39,7 @@ else {
 if ($startNum -le 99) {
     for ($i = $startNum; $i -le 99; $i++) {
         $candidate = $base + $i.ToString("D2")
-        $exists = Get-ADUser -Filter "SamAccountName -eq '$candidate'" -ErrorAction SilentlyContinue
+        $exists = Get-ADUser -Filter "SamAccountName -eq '$($candidate -replace "'", "''")'" -ErrorAction Stop
         if (-not $exists) {
             $module.Result.found = $true
             $module.Result.next_username = $candidate
@@ -48,7 +51,7 @@ if ($startNum -le 99) {
 # Agotado el numerico, rango alfabetico a-z.
 for ($c = [byte][char]'a'; $c -le [byte][char]'z'; $c++) {
     $candidate = $base + [char]$c
-    $exists = Get-ADUser -Filter "SamAccountName -eq '$candidate'" -ErrorAction SilentlyContinue
+    $exists = Get-ADUser -Filter "SamAccountName -eq '$($candidate -replace "'", "''")'" -ErrorAction Stop
     if (-not $exists) {
         $module.Result.found = $true
         $module.Result.next_username = $candidate

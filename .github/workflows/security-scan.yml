@@ -51,3 +51,31 @@ jobs:
           set -e
           find . -name '*.sh' -not -path './.git/*' -print0 \
             | xargs -0 -r shellcheck --severity=warning
+
+  powershell:
+    name: PowerShell (sintaxis, PSScriptAnalyzer y pruebas)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Sintaxis
+        shell: pwsh
+        run: |
+          $bad = 0
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $t = $null; $e = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$t, [ref]$e)
+            foreach ($x in $e) { "::error file=$($_.FullName),line=$($x.Extent.StartLineNumber)::$($x.Message)"; $bad++ }
+          }
+          if ($bad) { exit 1 }
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Scope CurrentUser -Force
+          # Los módulos de Ansible reciben la contraseña en claro de Ansible (no_log): esa regla no aplica.
+          $r = Invoke-ScriptAnalyzer -Path ad-powershell -Recurse -Severity Error, ParseError `
+                 -ExcludeRule PSAvoidUsingConvertToSecureStringWithPlainText
+          $r | Format-Table -AutoSize
+          if ($r) { exit 1 }
+      - name: Pruebas con AD simulado
+        shell: pwsh
+        run: ./ad-powershell/tests/run.ps1

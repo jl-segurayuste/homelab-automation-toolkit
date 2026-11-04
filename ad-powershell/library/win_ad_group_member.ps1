@@ -25,16 +25,21 @@ $module.Result.changed = $false
 $groupsChanged = @()
 $errors = @()
 
+# La pertenencia se mira en el memberOf del usuario. Antes se usaba Get-ADGroupMember con
+# SilentlyContinue: si fallaba (grupos de mas de 5000 miembros, miembros de otros dominios), el
+# usuario parecia no ser miembro y en state=absent la baja salia bien sin retirarlo del grupo.
+$userObj  = Get-ADUser -Identity $user -Properties memberOf -ErrorAction Stop
+$memberOf = @($userObj.memberOf)
+
 foreach ($group in $module.Params.groups) {
     try {
-        $g = Get-ADGroup -Filter "SamAccountName -eq '$group'" -ErrorAction SilentlyContinue
+        $g = Get-ADGroup -Filter "SamAccountName -eq '$($group -replace "'", "''")'" -ErrorAction Stop
         if (-not $g) {
             $errors += "Grupo '$group' no existe en AD"
             continue
         }
 
-        $isMember = Get-ADGroupMember -Identity $group -ErrorAction SilentlyContinue |
-            Where-Object { $_.SamAccountName -eq $user }
+        $isMember = $memberOf -contains $g.DistinguishedName
 
         if ($state -eq "present") {
             if (-not $isMember) {

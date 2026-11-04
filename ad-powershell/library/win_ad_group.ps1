@@ -86,7 +86,7 @@ if ($existing) {
 }
 
 # El grupo no existe: comprobar que el GID este libre y crearlo.
-$gidConflict = Get-ADGroup -Filter "gidNumber -eq $gid" -Properties gidNumber, SamAccountName -ErrorAction SilentlyContinue
+$gidConflict = Get-ADGroup -Filter "gidNumber -eq $gid" -Properties gidNumber, SamAccountName -ErrorAction Stop
 if ($gidConflict) {
     $module.FailJson("El GID $gid ya esta en uso por el grupo $($gidConflict.SamAccountName)")
 }

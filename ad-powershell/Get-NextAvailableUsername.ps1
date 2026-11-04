@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Calcula el siguiente nombre de usuario disponible en Active Directory.
 
@@ -55,12 +55,15 @@ function Get-NextAvailableUsername {
         $startNum = 1
     }
 
+    # Las consultas van con -ErrorAction Stop: con SilentlyContinue, si el controlador de dominio
+    # no respondía, el primer candidato parecía libre aunque existiera.
+
     # Buscar en rango numérico 01-99
     if ($startNum -le 99) {
         for ($i = $startNum; $i -le 99; $i++) {
             $candidate = $base + $i.ToString("D2")
-            $exists = Get-ADUser -Filter "SamAccountName -eq '$candidate'" `
-                                 -ErrorAction SilentlyContinue
+            $exists = Get-ADUser -Filter "SamAccountName -eq '$($candidate -replace "'", "''")'" `
+                                 -ErrorAction Stop
             if (-not $exists) {
                 return @{
                     found         = $true
@@ -73,8 +76,8 @@ function Get-NextAvailableUsername {
     # Agotado rango numérico, buscar en rango alfabético a-z
     for ($c = [byte][char]'a'; $c -le [byte][char]'z'; $c++) {
         $candidate = $base + [char]$c
-        $exists = Get-ADUser -Filter "SamAccountName -eq '$candidate'" `
-                             -ErrorAction SilentlyContinue
+        $exists = Get-ADUser -Filter "SamAccountName -eq '$($candidate -replace "'", "''")'" `
+                             -ErrorAction Stop
         if (-not $exists) {
             return @{
                 found         = $true

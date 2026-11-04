@@ -44,7 +44,7 @@ desde playbooks contra hosts Windows (WinRM/SSH) con soporte de `--check`:
 | `win_ad_user` | Alta/baja/actualización de usuario con atributos POSIX; `update_mode` safe/force; membresía de grupos; contraseña dada o generada |
 | `win_ad_group` | Alta/baja de grupo con `gidNumber`; no sobrescribe un GID existente distinto |
 | `win_ad_group_member` | Añade (`present`) o retira (`absent`) un usuario de varios grupos (offboarding) |
-| `win_ad_random_password` | Genera contraseña conforme a la política (no realiza cambios; usa `no_log`) |
+| `win_ad_random_password` | Genera contraseña conforme a la política con el generador criptográfico (no realiza cambios; la devuelve en el resultado: tarea con `no_log: true`) |
 | `win_ad_next_username` | Calcula el siguiente `SamAccountName` libre (solo lectura) |
 
 Ejemplo de playbook en [`examples/alta_usuario.yml`](examples/alta_usuario.yml). Documentación
@@ -100,8 +100,16 @@ Comprobaciones recomendadas:
 - **Idempotencia**: ejecuta el playbook dos veces; la segunda debe salir `ok`, no `changed`.
 - Las contraseñas (parámetro `password` o `generate_password`) van siempre con `no_log: true`.
 
-> Nota: estos módulos están escritos en PowerShell y requieren ejecutarse contra Windows;
-> la sintaxis PowerShell debe validarse en un host con `pwsh`/RSAT antes de producción.
+Sin Windows ni dominio, en cualquier equipo con `pwsh` (es lo que ejecuta el CI):
+
+```bash
+pwsh -NoProfile -File ad-powershell/tests/run.ps1      # funciones con un módulo ActiveDirectory simulado
+pwsh -NoProfile -c 'Install-Module PSScriptAnalyzer -Scope CurrentUser -Force;
+  Invoke-ScriptAnalyzer -Path ad-powershell -Recurse -Severity Error,ParseError'
+```
+
+> Nota: los módulos de `library/` necesitan `Ansible.Basic`, así que el CI solo comprueba su
+> sintaxis y su análisis estático; su comportamiento hay que probarlo contra un Windows real.
 
 ## Notas de seguridad
 
