@@ -52,7 +52,7 @@ mientras la RC4 sale bien. El fallo no se nota hasta que la cuenta deja de admit
 Por eso, en modo cliente, un principal con `/` exige `--account <sAMAccountName>` o `--salt <salt>`
 (`--default-salt` solo si el KDC es MIT o es el `host/` de una cuenta de equipo), el KVNO tiene que ser el de la
 cuenta (`msDS-KeyVersionNumber`) y, si hay un ticket (`kinit`), el script comprueba el keytab con `kvno -k` y avisa si el
-ticket no era AES. `klist -kte` no sirve para comprobarlo: solo lista las entradas. `-s` necesita krb5 1.18 o superior.
+ticket no era AES. `klist -kte` no sirve para comprobarlo: solo lista las entradas. `-s` necesita krb5 1.16 o superior (RHEL 7 lleva la 1.15).
 
 Ejemplo de `systemd.timer` para renovar cada 6 horas
 (`/etc/systemd/system/krb-renew.service` y `krb-renew.timer`):

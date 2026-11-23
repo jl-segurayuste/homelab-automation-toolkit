@@ -78,7 +78,7 @@ EOF
     exit 2
   fi
   if [[ -n "$SALT" ]] && ! printf 'addent\nquit\n' | ktutil 2>&1 | grep -q -- '-s salt'; then
-    echo "[ERROR] Este ktutil no admite -s (salt); hace falta krb5 1.18 o superior (RHEL 8, Debian 11)." >&2; exit 1
+    echo "[ERROR] Este ktutil no admite -s (salt); hace falta krb5 1.16 o superior (RHEL 8, Debian 10)." >&2; exit 1
   fi
   if [[ -z "$SALT" && "$NAME" != */* ]]; then
     echo "[*] Salt por defecto (${REALM}${NAME}): con AD solo vale si '${NAME}' esta escrito exactamente como su sAMAccountName."
